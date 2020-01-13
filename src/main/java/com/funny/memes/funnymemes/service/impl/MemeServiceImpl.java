@@ -24,7 +24,7 @@ public class MemeServiceImpl implements MemeService {
     public Meme findById(String id) {
         Meme meme = repository.findById(id).orElse(new Meme());
 
-        LOG.info("Found meme: " + meme);
+        LOG.info("Found meme: {}", meme.toString());
         return meme;
     }
 }

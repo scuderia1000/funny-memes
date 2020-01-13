@@ -5,12 +5,13 @@ import com.funny.memes.funnymemes.entity.Meme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Date;
-
+import java.util.List;
 
 @SpringBootApplication
 public class FunnyMemesApplication implements CommandLineRunner {
@@ -19,6 +20,9 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 	@Autowired
 	private MemeRepository repository;
+
+	@Value("#{'${reddit.group}'.split(',')}")
+	private List<String> redditGroups;
 
 	public static void main(String[] args) {
 		SpringApplication.run(FunnyMemesApplication.class, args);
@@ -38,6 +42,10 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 		repository.save(meme);
 
-		LOG.info("Meme saved: " + meme.toString());
+		LOG.info("Meme saved: {}", meme.toString());
+
+		for (String groupName : redditGroups) {
+			LOG.info("Reddit group name: {}", groupName);
+		}
 	}
 }

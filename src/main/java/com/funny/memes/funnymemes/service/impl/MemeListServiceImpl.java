@@ -26,7 +26,7 @@ public class MemeListServiceImpl implements MemeListService {
     public List<MemeList> findAll() {
         List<MemeList> memes = repository.findAll();
 
-        LOG.info("Memes count: " + memes.size());
+        LOG.info("Memes count: {}", memes.size());
         return memes;
     }
 }

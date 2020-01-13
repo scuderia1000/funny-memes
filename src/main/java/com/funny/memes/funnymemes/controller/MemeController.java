@@ -38,7 +38,7 @@ public class MemeController {
 
     @RequestMapping(value = "/:{id}", method = RequestMethod.GET)
     public Meme getMeme(@PathVariable String id) {
-        LOG.info("Get meme by id request: " + id);
+        LOG.info("Get meme by id request: {}", id);
         return memeService.findById(id);
     }
 }
