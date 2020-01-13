@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document
+@Document(collection = "memes")
 public class Meme {
 
     @Id
@@ -63,5 +63,16 @@ public class Meme {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "Meme{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", publishDate=" + publishDate +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
