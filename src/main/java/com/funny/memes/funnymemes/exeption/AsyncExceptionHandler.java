@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 
 public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final static Logger LOG = LoggerFactory.getLogger(AsyncExceptionHandler.class);
 
     @Override
     public void handleUncaughtException(Throwable throwable, Method method, Object... objects) {

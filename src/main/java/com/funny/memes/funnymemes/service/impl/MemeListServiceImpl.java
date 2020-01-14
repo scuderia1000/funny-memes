@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class MemeListServiceImpl implements MemeListService {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final static Logger LOG = LoggerFactory.getLogger(MemeListServiceImpl.class);
 
     private final MemeListRepository repository;
 

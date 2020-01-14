@@ -2,7 +2,7 @@ package com.funny.memes.funnymemes;
 
 import com.funny.memes.funnymemes.dao.MemeRepository;
 import com.funny.memes.funnymemes.entity.Meme;
-import com.funny.memes.funnymemes.parsers.MemesParser;
+import com.funny.memes.funnymemes.parsers.AppListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import java.util.concurrent.Future;
 @SpringBootApplication
 public class FunnyMemesApplication implements CommandLineRunner {
 
-	private final Logger LOG = LoggerFactory.getLogger(getClass());
+	private final static Logger LOG = LoggerFactory.getLogger(FunnyMemesApplication.class);
 
 	@Autowired
 	private MemeRepository repository;
 
 	@Autowired
-	private MemesParser memesParser;
+	private AppListener memesParserThread;
 
 	@Value("#{'${reddit.group}'.split(',')}")
 	private List<String> redditGroups;
@@ -55,31 +55,33 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 		}
 
-		testAsyncAnnotationForMethodsWithReturnType();
-		testAsyncAnnotationForMethodsWithException();
+//		testAsyncAnnotationForMethodsWithReturnType();
+//		testAsyncAnnotationForMethodsWithException();
 	}
 
+//
+//	public void testAsyncAnnotationForMethodsWithReturnType()
+//			throws InterruptedException, ExecutionException {
+//		System.out.println("Invoking an asynchronous method. "
+//				+ Thread.currentThread().getName());
+//
+//		Future<String> future = memesParserThread.asyncMethodWithReturnType();
+//
+//		while (true) {
+//			if (future.isDone()) {
+//				System.out.println("Result from asynchronous process - " + future.get());
+//				break;
+//			}
+//			System.out.println("Continue doing something else. ");
+//			Thread.sleep(1000);
+//		}
+//	}
+//
+//	public void testAsyncAnnotationForMethodsWithException() throws Exception {
+//		System.out.println("Start - invoking an asynchronous method. ");
+//		memesParserThread.asyncMethodWithExceptions();
+//		System.out.println("End - invoking an asynchronous method. ");
+//	}
 
-	public void testAsyncAnnotationForMethodsWithReturnType()
-			throws InterruptedException, ExecutionException {
-		System.out.println("Invoking an asynchronous method. "
-				+ Thread.currentThread().getName());
 
-		Future<String> future = memesParser.asyncMethodWithReturnType();
-
-		while (true) {
-			if (future.isDone()) {
-				System.out.println("Result from asynchronous process - " + future.get());
-				break;
-			}
-			System.out.println("Continue doing something else. ");
-			Thread.sleep(1000);
-		}
-	}
-
-	public void testAsyncAnnotationForMethodsWithException() throws Exception {
-		System.out.println("Start - invoking an asynchronous method. ");
-		memesParser.asyncMethodWithExceptions();
-		System.out.println("End - invoking an asynchronous method. ");
-	}
 }

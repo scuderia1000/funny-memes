@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/feed")
 public class MemeController {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final static Logger LOG = LoggerFactory.getLogger(MemeController.class);
 
     private final MemeService memeService;
 

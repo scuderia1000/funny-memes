@@ -14,16 +14,25 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
 
-    @Value("${thread-task-executor.pool.size}")
-    private int maxPoolSize;
+    @Value("${thread-task-executor.core.pool.size}")
+    private Integer propertyCorePoolSize;
+
+    @Value("${thread-task-executor.max.pool.size}")
+    private int propertyMaxPoolSize;
+
+    @Value("${thread-task-executor.queue.capacity}")
+    private int propertyQueueCapacity;
 
     @Override
     public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setMaxPoolSize(maxPoolSize);
-        threadPoolTaskExecutor.initialize();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(propertyCorePoolSize);
+        executor.setMaxPoolSize(propertyMaxPoolSize);
+        executor.setQueueCapacity(propertyQueueCapacity);
+        executor.setThreadNamePrefix("MemeParserAsyncThread-");
+        executor.initialize();
 
-        return threadPoolTaskExecutor;
+        return executor;
     }
 
     @Override

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MemeServiceImpl implements MemeService {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final static Logger LOG = LoggerFactory.getLogger(MemeServiceImpl.class);
 
     private final MemeRepository repository;
 
