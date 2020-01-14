@@ -2,6 +2,7 @@ package com.funny.memes.funnymemes;
 
 import com.funny.memes.funnymemes.dao.MemeRepository;
 import com.funny.memes.funnymemes.entity.Meme;
+import com.funny.memes.funnymemes.parsers.MemesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @SpringBootApplication
 public class FunnyMemesApplication implements CommandLineRunner {
@@ -20,6 +23,9 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 	@Autowired
 	private MemeRepository repository;
+
+	@Autowired
+	private MemesParser memesParser;
 
 	@Value("#{'${reddit.group}'.split(',')}")
 	private List<String> redditGroups;
@@ -46,6 +52,34 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 		for (String groupName : redditGroups) {
 			LOG.info("Reddit group name: {}", groupName);
+
 		}
+
+		testAsyncAnnotationForMethodsWithReturnType();
+		testAsyncAnnotationForMethodsWithException();
+	}
+
+
+	public void testAsyncAnnotationForMethodsWithReturnType()
+			throws InterruptedException, ExecutionException {
+		System.out.println("Invoking an asynchronous method. "
+				+ Thread.currentThread().getName());
+
+		Future<String> future = memesParser.asyncMethodWithReturnType();
+
+		while (true) {
+			if (future.isDone()) {
+				System.out.println("Result from asynchronous process - " + future.get());
+				break;
+			}
+			System.out.println("Continue doing something else. ");
+			Thread.sleep(1000);
+		}
+	}
+
+	public void testAsyncAnnotationForMethodsWithException() throws Exception {
+		System.out.println("Start - invoking an asynchronous method. ");
+		memesParser.asyncMethodWithExceptions();
+		System.out.println("End - invoking an asynchronous method. ");
 	}
 }
