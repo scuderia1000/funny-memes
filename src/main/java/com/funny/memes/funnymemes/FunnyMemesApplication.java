@@ -41,7 +41,6 @@ public class FunnyMemesApplication implements CommandLineRunner {
 		LOG.info("Create new meme");
 
 		Meme meme = new Meme();
-		meme.setName("First meme");
 		meme.setImagePath("http://test.com/image_1.jpg");
 		meme.setDescription("First meme description");
 		meme.setPublishDate(new Date());

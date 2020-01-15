@@ -10,20 +10,11 @@ public class Meme {
 
     @Id
     private String id;
-    private String name;
+    private String authorName;
     private String imagePath;
     private Date publishDate;
     private String description;
-
-    public Meme() {
-    }
-
-    public Meme(String name, String imagePath, Date publishDate, String description) {
-        this.name = name;
-        this.imagePath = imagePath;
-        this.publishDate = publishDate;
-        this.description = description;
-    }
+    private Integer score;
 
     public String getId() {
         return id;
@@ -33,12 +24,12 @@ public class Meme {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public String getImagePath() {
@@ -65,14 +56,11 @@ public class Meme {
         this.description = description;
     }
 
-    @Override
-    public String toString() {
-        return "Meme{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", imagePath='" + imagePath + '\'' +
-                ", publishDate=" + publishDate +
-                ", description='" + description + '\'' +
-                '}';
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
     }
 }

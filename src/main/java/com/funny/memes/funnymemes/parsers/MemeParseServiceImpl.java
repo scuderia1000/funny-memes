@@ -25,6 +25,9 @@ public class MemeParseServiceImpl implements MemeParseService {
     @Value("${parse-meme-thread.wait.time}")
     private Long propertyThreadWaitTime;
 
+    @Value("${reddit.postfix}")
+    private String redditPostfix;
+
     private volatile boolean canRestart = true;
 
     private final static Object lock = new Object();
@@ -58,7 +61,12 @@ public class MemeParseServiceImpl implements MemeParseService {
         }
         for (String groupName : propertyRedditGroups) {
             LOG.info("Start process reddit group name: {}", groupName);
-            parseProcessor.startParseProcessing(groupName);
+            StringBuilder redditGroupUrl = new StringBuilder(groupName);
+            if (groupName.indexOf("/", groupName.length() - 2) == -1) {
+                redditGroupUrl.append("/");
+            }
+            redditGroupUrl.append(redditPostfix);
+            parseProcessor.startParseProcessing(redditGroupUrl.toString());
         }
         LOG.debug("Parse service ({}): Parse process completed", Thread.currentThread().getName());
     }
