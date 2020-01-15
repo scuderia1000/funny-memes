@@ -60,7 +60,7 @@ public class MemeParseServiceImpl implements MemeParseService {
             LOG.info("Start process reddit group name: {}", groupName);
             parseProcessor.startParseProcessing(groupName);
         }
-
+        LOG.debug("Parse service ({}): Parse process completed", Thread.currentThread().getName());
     }
 
     @PreDestroy
