@@ -68,7 +68,10 @@ public class MemeParseServiceImpl implements MemeParseService {
             redditGroupUrl.append(redditPostfix);
             parseProcessor.startParseProcessing(redditGroupUrl.toString());
         }
-        LOG.debug("Parse service ({}): Parse process completed", Thread.currentThread().getName());
+        LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
+//        synchronized (lock){
+//            canRestart = true;
+//        }
     }
 
     @PreDestroy
