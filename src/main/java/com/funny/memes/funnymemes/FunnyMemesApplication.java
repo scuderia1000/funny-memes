@@ -1,5 +1,7 @@
 package com.funny.memes.funnymemes;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.Bucket;
 import com.funny.memes.funnymemes.dao.MemeRepository;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.parsers.AppListener;
@@ -25,7 +27,7 @@ public class FunnyMemesApplication implements CommandLineRunner {
 	private MemeRepository repository;
 
 	@Autowired
-	private AppListener memesParserThread;
+	private AmazonS3 s3Client;
 
 	@Value("#{'${reddit.group}'.split(',')}")
 	private List<String> redditGroups;
@@ -49,8 +51,9 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 		LOG.info("Meme saved: {}", meme.toString());
 
-		for (String groupName : redditGroups) {
-			LOG.info("Reddit group name: {}", groupName);
+		List<Bucket> buckets = s3Client.listBuckets();
+		for (Bucket bucket : buckets) {
+			System.out.println("Bucket name: " + bucket.getName());
 
 		}
 

@@ -8,9 +8,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.entity.RedditMemeDeserializer;
+import com.funny.memes.funnymemes.service.DownloadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,12 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private DownloadService downloadService;
+
+    @Value("${app.awsServices.bucketName}")
+    private String amazonBucketName;
 
     @Async
     @Override
@@ -74,6 +82,9 @@ public class ParseProcessorImpl implements ParseProcessor {
                                 List<Meme> memes = objectMapper.readValue(children, new TypeReference<List<Meme>>() {});
                                 if (memes != null && !memes.isEmpty()) {
                                     memes.remove(null);
+                                    for (Meme meme : memes) {
+                                        downloadService.downloadImage(meme.getImagePath());
+                                    }
                                 }
                             } catch (IOException e) {
 

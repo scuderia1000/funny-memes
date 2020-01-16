@@ -61,10 +61,8 @@ public class MemeParseServiceImpl implements MemeParseService {
         }
         for (String groupName : propertyRedditGroups) {
             LOG.info("Start process reddit group name: {}", groupName);
+
             StringBuilder redditGroupUrl = new StringBuilder(groupName);
-            if (groupName.indexOf("/", groupName.length() - 2) == -1) {
-                redditGroupUrl.append("/");
-            }
             redditGroupUrl.append(redditPostfix);
             parseProcessor.startParseProcessing(redditGroupUrl.toString());
         }
