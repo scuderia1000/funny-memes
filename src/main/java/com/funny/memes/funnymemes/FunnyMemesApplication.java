@@ -1,10 +1,7 @@
 package com.funny.memes.funnymemes;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.funny.memes.funnymemes.dao.MemeRepository;
 import com.funny.memes.funnymemes.entity.Meme;
-import com.funny.memes.funnymemes.parsers.AppListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 @SpringBootApplication
 public class FunnyMemesApplication implements CommandLineRunner {
@@ -26,8 +21,8 @@ public class FunnyMemesApplication implements CommandLineRunner {
 	@Autowired
 	private MemeRepository repository;
 
-	@Autowired
-	private AmazonS3 s3Client;
+//	@Autowired
+//	private AmazonS3 s3Client;
 
 	@Value("#{'${reddit.group}'.split(',')}")
 	private List<String> redditGroups;
@@ -51,11 +46,11 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 		LOG.info("Meme saved: {}", meme.toString());
 
-		List<Bucket> buckets = s3Client.listBuckets();
-		for (Bucket bucket : buckets) {
-			System.out.println("Bucket name: " + bucket.getName());
-
-		}
+//		List<Bucket> buckets = s3Client.listBuckets();
+//		for (Bucket bucket : buckets) {
+//			System.out.println("Bucket name: " + bucket.getName());
+//
+//		}
 
 //		testAsyncAnnotationForMethodsWithReturnType();
 //		testAsyncAnnotationForMethodsWithException();

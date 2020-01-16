@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.entity.RedditMemeDeserializer;
-import com.funny.memes.funnymemes.service.DownloadService;
+import com.funny.memes.funnymemes.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -34,10 +35,7 @@ public class ParseProcessorImpl implements ParseProcessor {
     private RestTemplate restTemplate;
 
     @Autowired
-    private DownloadService downloadService;
-
-    @Value("${app.awsServices.bucketName}")
-    private String amazonBucketName;
+    private FileService fileService;
 
     @Async
     @Override
@@ -83,7 +81,13 @@ public class ParseProcessorImpl implements ParseProcessor {
                                 if (memes != null && !memes.isEmpty()) {
                                     memes.remove(null);
                                     for (Meme meme : memes) {
-                                        downloadService.downloadImage(meme.getImagePath());
+                                        String imagePath = meme.getImagePath();
+                                        if (!StringUtils.isEmpty(imagePath)) {
+                                            if (imagePath.contains("\"")) {
+                                                imagePath = imagePath.replaceAll("\"", "");
+                                            }
+                                            fileService.downloadImage(imagePath);
+                                        }
                                     }
                                 }
                             } catch (IOException e) {
