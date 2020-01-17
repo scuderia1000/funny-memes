@@ -1,12 +1,14 @@
 package com.funny.memes.funnymemes.parsers;
 
 import com.funny.memes.funnymemes.entity.Meme;
+import com.funny.memes.funnymemes.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Array;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,6 +47,9 @@ public class MemeParseServiceImpl implements MemeParseService {
     @Autowired
     private ParseProcessor parseProcessor;
 
+    @Autowired
+    private FileService fileService;
+
     @Async
     @Override
     public void initialize() {
@@ -66,33 +72,83 @@ public class MemeParseServiceImpl implements MemeParseService {
             LOG.debug("Parse service ({}): Restarting parse process", Thread.currentThread().getName());
             canRestart = false;
         }
-        List<CompletableFuture> parseProcesList = new ArrayList<>();
-//        CompletableFuture<List<Meme>> [] features = (CompletableFuture<List<Meme>> []) Array.newInstance(CompletableFuture.class, propertyRedditGroups.size());
-        List<CompletableFuture<List<Meme>>> features = new ArrayList<>();
-//        CompletableFuture<?> [] features = new CompletableFuture<?>[propertyRedditGroups.size()];
-        int i = 0;
-        for (String groupName : propertyRedditGroups) {
-            LOG.info("Start process reddit group name: {}", groupName);
 
-            String redditGroupUrl = groupName + redditPostfix;
-            features.add(parseProcessor.startParseProcessing(redditGroupUrl));
+        List<CompletableFuture<List<Meme>>> features = propertyRedditGroups.stream()
+                .map(groupName -> parseProcessor.startParseProcessing(groupName + redditPostfix))
+                .collect(toList());
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                features.toArray(new CompletableFuture[0])
+        );
+
+        CompletableFuture<List<Meme>> memesFeature = allFutures
+                .thenApply(justVoid -> features.stream()
+                        .flatMap(feature -> feature.join().stream())
+                        .collect(toList())
+                );
+        List<Meme> memes = new ArrayList<>();
+        try {
+            memes = memesFeature.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (!memes.isEmpty()) {
+
+        }
+
+//        });
+//        CompletableFuture<?> [] features = new CompletableFuture<?>[propertyRedditGroups.size()];
+//        int i = 0;
+//        for (String groupName : propertyRedditGroups) {
+//            LOG.info("Start process reddit group name: {}", groupName);
+//
+//            String redditGroupUrl = groupName + redditPostfix;
+//            features.add(parseProcessor.startParseProcessing(redditGroupUrl));
+
+
 //            features[i] = parseProcessor.startParseProcessing(redditGroupUrl);
-            i++;
+//            i++;
 //            parseProcesList.add(parseProcessor.startParseProcessing(redditGroupUrl.toString()));
 //            CompletableFuture<List<Meme>> page1 = gitHubLookupService.findUser("PivotalSoftware");
 //            parseProcessor.startParseProcessing(redditGroupUrl.toString());
-        }
+
+//        }
+
 //        parseProcesList.toArray()
-        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0]))
-                .thenAccept(justVoid -> {
-                    final List<Meme> memes = features.stream()
-                            .flatMap(completableFuture -> completableFuture.join().stream())
-                            .collect(toList());
-                    for (Meme meme : memes) {
-                        System.out.println(meme);
-                    }
-                });
-//        CompletableFuture.allOf(features).join();
+//        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0]))
+//                .thenAccept(justVoid -> {
+//                    final List<Meme> memes = features.stream()
+//                            .flatMap(completableFuture -> completableFuture.join().stream())
+//                            .collect(toList());
+//                    if (!memes.isEmpty()) {
+//                        memes.remove(null);
+//                        for (Meme meme : memes) {
+//                            String imagePath = meme.getImagePath();
+//                            if (!StringUtils.isEmpty(imagePath)) {
+//                                if (imagePath.contains("\"")) {
+//                                    imagePath = imagePath.replaceAll("\"", "");
+//                                }
+//                                String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+//                                if ("jpg".equals(extension) || "jpeg".equals(extension)) {
+//                                    String fileName = fileService.downloadImage(imagePath);
+//                                    if (!StringUtils.isEmpty(fileName)) {
+//                                        String s3Url = fileService.uploadMediaToS3(fileName);
+//                                        if (!StringUtils.isEmpty(s3Url)) {
+//
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                });
+//        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0])).join();
+//        List<Meme> memes = features.stream()
+//                .map(CompletableFuture::join)
+//                .map(justVoid -> {
+//
+//                })
+//                .collect(toList());
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
 //        synchronized (lock){
 //            canRestart = true;

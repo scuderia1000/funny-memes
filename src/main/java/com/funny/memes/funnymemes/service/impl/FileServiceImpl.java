@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -63,17 +64,23 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String uploadMediaToS3(String fileName) {
+        LOG.debug("Start upload file {} to s3", fileName);
+
+        String key = fileName;
         CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                 PutObjectRequest.builder()
                         .bucket(amazonBucketName)
-                        .key(fileName)
+                        .key(key)
                         .build(),
                 AsyncRequestBody.fromFile(Paths.get(fileName))
         );
         future.whenComplete((resp, err) -> {
             try {
                 if (resp != null) {
-                    System.out.println("my response: " + resp);
+                    final URL reportUrl = s3AsyncClient.utilities()
+                            .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
+                    LOG.info("Put object response: {}", resp);
+                    LOG.info("Put object url: {}", reportUrl.toString());
                 } else {
                     // Handle error
                     err.printStackTrace();

@@ -113,6 +113,9 @@ public class ParseProcessorImpl implements ParseProcessor {
             }
         }
 //        LOG.debug("ParseProcessor ({}): Parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
-        return CompletableFuture.completedFuture(memes);
+        return CompletableFuture.completedFuture(memes).exceptionally(ex -> {
+            LOG.debug("Exception in ParseProcessor ({}) while parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
+            return new ArrayList<>();
+        });
     }
 }
