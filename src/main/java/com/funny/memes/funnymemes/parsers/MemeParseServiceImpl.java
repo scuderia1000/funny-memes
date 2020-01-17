@@ -9,9 +9,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Author: Valentin Ershov
@@ -63,20 +67,32 @@ public class MemeParseServiceImpl implements MemeParseService {
             canRestart = false;
         }
         List<CompletableFuture> parseProcesList = new ArrayList<>();
-        CompletableFuture<List<Meme>> features [] = new CompletableFuture[propertyRedditGroups.size()];
+//        CompletableFuture<List<Meme>> [] features = (CompletableFuture<List<Meme>> []) Array.newInstance(CompletableFuture.class, propertyRedditGroups.size());
+        List<CompletableFuture<List<Meme>>> features = new ArrayList<>();
+//        CompletableFuture<?> [] features = new CompletableFuture<?>[propertyRedditGroups.size()];
         int i = 0;
         for (String groupName : propertyRedditGroups) {
             LOG.info("Start process reddit group name: {}", groupName);
 
             String redditGroupUrl = groupName + redditPostfix;
-            features[i] = parseProcessor.startParseProcessing(redditGroupUrl);
+            features.add(parseProcessor.startParseProcessing(redditGroupUrl));
+//            features[i] = parseProcessor.startParseProcessing(redditGroupUrl);
             i++;
 //            parseProcesList.add(parseProcessor.startParseProcessing(redditGroupUrl.toString()));
 //            CompletableFuture<List<Meme>> page1 = gitHubLookupService.findUser("PivotalSoftware");
 //            parseProcessor.startParseProcessing(redditGroupUrl.toString());
         }
 //        parseProcesList.toArray()
-        CompletableFuture.allOf(features).join();
+        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0]))
+                .thenAccept(justVoid -> {
+                    final List<Meme> memes = features.stream()
+                            .flatMap(completableFuture -> completableFuture.join().stream())
+                            .collect(toList());
+                    for (Meme meme : memes) {
+                        System.out.println(meme);
+                    }
+                });
+//        CompletableFuture.allOf(features).join();
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
 //        synchronized (lock){
 //            canRestart = true;
