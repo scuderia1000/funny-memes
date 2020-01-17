@@ -1,5 +1,6 @@
 package com.funny.memes.funnymemes.parsers;
 
+import com.funny.memes.funnymemes.entity.Meme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Author: Valentin Ershov
@@ -59,13 +62,21 @@ public class MemeParseServiceImpl implements MemeParseService {
             LOG.debug("Parse service ({}): Restarting parse process", Thread.currentThread().getName());
             canRestart = false;
         }
+        List<CompletableFuture> parseProcesList = new ArrayList<>();
+        CompletableFuture<List<Meme>> features [] = new CompletableFuture[propertyRedditGroups.size()];
+        int i = 0;
         for (String groupName : propertyRedditGroups) {
             LOG.info("Start process reddit group name: {}", groupName);
 
-            StringBuilder redditGroupUrl = new StringBuilder(groupName);
-            redditGroupUrl.append(redditPostfix);
-            parseProcessor.startParseProcessing(redditGroupUrl.toString());
+            String redditGroupUrl = groupName + redditPostfix;
+            features[i] = parseProcessor.startParseProcessing(redditGroupUrl);
+            i++;
+//            parseProcesList.add(parseProcessor.startParseProcessing(redditGroupUrl.toString()));
+//            CompletableFuture<List<Meme>> page1 = gitHubLookupService.findUser("PivotalSoftware");
+//            parseProcessor.startParseProcessing(redditGroupUrl.toString());
         }
+//        parseProcesList.toArray()
+        CompletableFuture.allOf(features).join();
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
 //        synchronized (lock){
 //            canRestart = true;

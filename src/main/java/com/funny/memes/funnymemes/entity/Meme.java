@@ -11,7 +11,10 @@ public class Meme {
     @Id
     private String id;
     private String authorName;
+    // url источника
     private String imagePath;
+    // url на фойловом хранилище
+    private String mediaUrl;
     private Date publishDate;
     private String description;
     private Integer score;
@@ -62,5 +65,13 @@ public class Meme {
 
     public void setScore(Integer score) {
         this.score = score;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 }

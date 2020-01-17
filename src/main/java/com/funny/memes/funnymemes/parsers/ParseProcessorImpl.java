@@ -15,12 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * Author: Valentin Ershov
@@ -39,70 +43,76 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     @Async
     @Override
-    public void startParseProcessing(String redditGroupName) {
+    public CompletableFuture<List<Meme>> startParseProcessing(String redditGroupName) {
         LOG.debug("ParseProcessor ({}): Start parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
 
+        List<Meme> memes = new ArrayList<>();
         final HttpHeaders headers = new HttpHeaders();
         headers.set("User-Agent", "java:com.funny.memes.funnymemes:v1.0.0 (by scuderia1000)");
 
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
 
-        try {
-            ResponseEntity<ObjectNode> response = restTemplate.exchange(
-                    redditGroupName,
-                    HttpMethod.GET,
-                    httpEntity,
-                    ObjectNode.class
+        ResponseEntity<ObjectNode> response = restTemplate.exchange(
+                redditGroupName,
+                HttpMethod.GET,
+                httpEntity,
+                ObjectNode.class
+        );
+        if (response.getStatusCode().equals(HttpStatus.OK)) {
+            LOG.debug(
+                    "ParseProcessor ({}): Successfully get data from reddit group \"{}\"",
+                    Thread.currentThread().getName(),
+                    redditGroupName
             );
-            if (response.getStatusCode().equals(HttpStatus.OK)) {
-                LOG.debug(
-                        "ParseProcessor ({}): Successfully get data from reddit group \"{}\"",
-                        Thread.currentThread().getName(),
-                        redditGroupName
-                );
 
-                ObjectNode objectNode = response.getBody();
-                if (objectNode != null) {
-                    JsonNode data = objectNode.get("data");
-                    if (data != null) {
-                        JsonNode arrayNode = data.get("children");
-                        if (arrayNode != null) {
-                            String children = arrayNode.toString();
+            ObjectNode objectNode = response.getBody();
+            if (objectNode != null) {
+                JsonNode data = objectNode.get("data");
+                if (data != null) {
+                    JsonNode arrayNode = data.get("children");
+                    if (arrayNode != null) {
+                        String children = arrayNode.toString();
 
-                            SimpleModule simpleModule = new SimpleModule("RedditMemeDeserializer");
-                            simpleModule.addDeserializer(Meme.class, new RedditMemeDeserializer(Meme.class));
+                        SimpleModule simpleModule = new SimpleModule("RedditMemeDeserializer");
+                        simpleModule.addDeserializer(Meme.class, new RedditMemeDeserializer(Meme.class));
 
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-                            objectMapper.registerModule(simpleModule);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+                        objectMapper.registerModule(simpleModule);
 
-                            try {
-                                List<Meme> memes = objectMapper.readValue(children, new TypeReference<List<Meme>>() {});
-                                if (memes != null && !memes.isEmpty()) {
-                                    memes.remove(null);
-                                    for (Meme meme : memes) {
-                                        String imagePath = meme.getImagePath();
-                                        if (!StringUtils.isEmpty(imagePath)) {
-                                            if (imagePath.contains("\"")) {
-                                                imagePath = imagePath.replaceAll("\"", "");
-                                            }
-                                            fileService.downloadImage(imagePath);
-                                        }
-                                    }
-                                }
-                            } catch (IOException e) {
+                        try {
+                            memes = objectMapper.readValue(children, new TypeReference<List<Meme>>() {
+                            });
 
-                            }
+                            LOG.debug("ParseProcessor ({}): Parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
+
+//                                List<Meme> memes = objectMapper.readValue(children, new TypeReference<List<Meme>>() {});
+//                                if (memes != null && !memes.isEmpty()) {
+//                                    memes.remove(null);
+//                                    for (Meme meme : memes) {
+//                                        String imagePath = meme.getImagePath();
+//                                        if (!StringUtils.isEmpty(imagePath)) {
+//                                            if (imagePath.contains("\"")) {
+//                                                imagePath = imagePath.replaceAll("\"", "");
+//                                            }
+//                                            String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+//                                            if ("jpg".equals(extension) || "jpeg".equals(extension)) {
+//                                                String fileName = fileService.downloadImage(imagePath);
+//                                                if (!StringUtils.isEmpty(fileName)) {
+//                                                    String s3Url = fileService.uploadMediaToS3(fileName);
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }
+                        } catch (IOException e) {
+
                         }
                     }
                 }
             }
-            Thread.sleep(1000);
-//            return new AsyncResult<String>("hello world !!!!");
-        } catch (InterruptedException e) {
-            //
         }
-        LOG.debug("ParseProcessor ({}): Parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
-//        return null;
+//        LOG.debug("ParseProcessor ({}): Parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
+        return CompletableFuture.completedFuture(memes);
     }
 }

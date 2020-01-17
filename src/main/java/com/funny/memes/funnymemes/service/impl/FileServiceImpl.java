@@ -1,6 +1,9 @@
 package com.funny.memes.funnymemes.service.impl;
 
+import com.funny.memes.funnymemes.parsers.ParseProcessorImpl;
 import com.funny.memes.funnymemes.service.FileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,19 +24,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class FileServiceImpl implements FileService {
 
-    private static final String DIR = "/tmp/";
-//    private static final HttpHeaders headers = new HttpHeaders();
-//
-//    static {
-//        final List<MediaType> acceptableMediaTypes = new ArrayList<MediaType>();
-//        acceptableMediaTypes.add(MediaType.IMAGE_JPEG);
-//        acceptableMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
-//
-//        headers.setAccept(acceptableMediaTypes);
-//    }
-
-    @Autowired
-    private RestTemplate restTemplate;
+    private final static Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
 
     @Autowired
     private S3AsyncClient s3AsyncClient;
@@ -42,48 +33,42 @@ public class FileServiceImpl implements FileService {
     private String amazonBucketName;
 
     @Override
-    public byte[] downloadImage(String url) {
-//        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-//        HttpEntity<Request>
-        String fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
+    public String downloadImage(String url) {
+        LOG.debug("Start file downloading from url: {}", url);
+        String fileName = url.substring(url.lastIndexOf("/") + 1);
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
         if ("jpg".equals(extension) || "jpeg".equals(extension)) {
             try {
-                ReadableByteChannel readChannel = Channels.newChannel(new URL(url).openStream());
-                FileOutputStream fileOS = new FileOutputStream(DIR + fileName);
-                FileChannel writeChannel = fileOS.getChannel();
-                writeChannel
-                        .transferFrom(readChannel, 0, Long.MAX_VALUE);
-                uploadMediaToS3(fileName);
-//            File file = new File("/tmp" + fileName);
-
-//            URL imageUrl = new URL(url);
-//            BufferedImage bufferedImage = ImageIO.read(imageUrl);
-//            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//            ImageIO.write(bufferedImage, "jpg", byteArrayOutputStream);
-//            byteArrayOutputStream.flush();
-//            MultipartFile multipartFile = new Mu(fileName,fileName,imageType,byteArrayOutputStream.toByteArray());
-//            byteArrayOutputStream.close()
-
-//            BufferedInputStream in = new BufferedInputStream(imageUrl.openStream());
-
-
+                try (InputStream inputStream = new URL(url).openStream()) {
+                    try (ReadableByteChannel readChannel = Channels.newChannel(inputStream)) {
+                        try (FileOutputStream fileOS = new FileOutputStream(fileName)) {
+                            try (FileChannel writeChannel = fileOS.getChannel()) {
+                                writeChannel
+                                        .transferFrom(readChannel, 0, Long.MAX_VALUE);
+//                                uploadMediaToS3(fileName);
+                            }
+                        }
+                    }
+                }
             } catch (IOException ex) {
+                LOG.debug("Error downloading file from url: {}", url);
                 ex.printStackTrace();
+                return null;
             }
         }
-        return new byte[0];
+        LOG.debug("Complete file downloading from url: {}", url);
+        return fileName;
     }
 
     @Override
-    public void uploadMediaToS3(String fileName) {
+    public String uploadMediaToS3(String fileName) {
         CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                 PutObjectRequest.builder()
                         .bucket(amazonBucketName)
                         .key(fileName)
                         .build(),
-                AsyncRequestBody.fromFile(Paths.get(DIR + fileName))
+                AsyncRequestBody.fromFile(Paths.get(fileName))
         );
         future.whenComplete((resp, err) -> {
             try {
@@ -100,5 +85,6 @@ public class FileServiceImpl implements FileService {
         });
 
         future.join();
+        return "test";
     }
 }

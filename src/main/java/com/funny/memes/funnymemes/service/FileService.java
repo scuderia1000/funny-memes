@@ -2,7 +2,7 @@ package com.funny.memes.funnymemes.service;
 
 public interface FileService {
 
-    byte[] downloadImage(String url);
+    String downloadImage(String url);
 
-    void uploadMediaToS3(String fileName);
+    String uploadMediaToS3(String fileName);
 }
