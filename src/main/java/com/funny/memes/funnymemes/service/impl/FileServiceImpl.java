@@ -45,9 +45,7 @@ public class FileServiceImpl implements FileService {
                     try (ReadableByteChannel readChannel = Channels.newChannel(inputStream)) {
                         try (FileOutputStream fileOS = new FileOutputStream(fileName)) {
                             try (FileChannel writeChannel = fileOS.getChannel()) {
-                                writeChannel
-                                        .transferFrom(readChannel, 0, Long.MAX_VALUE);
-//                                uploadMediaToS3(fileName);
+                                writeChannel.transferFrom(readChannel, 0, Long.MAX_VALUE);
                             }
                         }
                     }
@@ -63,35 +61,42 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String uploadMediaToS3(String fileName) {
+    public CompletableFuture<PutObjectResponse> uploadMediaToS3(String fileName) {
         LOG.debug("Start upload file {} to s3", fileName);
 
         String key = fileName;
-        CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
+        return s3AsyncClient.putObject(
                 PutObjectRequest.builder()
                         .bucket(amazonBucketName)
                         .key(key)
                         .build(),
                 AsyncRequestBody.fromFile(Paths.get(fileName))
         );
-        future.whenComplete((resp, err) -> {
-            try {
-                if (resp != null) {
-                    final URL reportUrl = s3AsyncClient.utilities()
-                            .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
-                    LOG.info("Put object response: {}", resp);
-                    LOG.info("Put object url: {}", reportUrl.toString());
-                } else {
-                    // Handle error
-                    err.printStackTrace();
-                }
-            } finally {
-                // Lets the application shut down. Only close the client when you are completely done with it.
-                s3AsyncClient.close();
-            }
-        });
-
-        future.join();
-        return "test";
+//        CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
+//                PutObjectRequest.builder()
+//                        .bucket(amazonBucketName)
+//                        .key(key)
+//                        .build(),
+//                AsyncRequestBody.fromFile(Paths.get(fileName))
+//        );
+//        future.whenComplete((resp, err) -> {
+//            try {
+//                if (resp != null) {
+//                    final URL reportUrl = s3AsyncClient.utilities()
+//                            .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
+//                    LOG.info("Put object response: {}", resp);
+//                    LOG.info("Put object url: {}", reportUrl.toString());
+//                } else {
+//                    // Handle error
+//                    err.printStackTrace();
+//                }
+//            } finally {
+//                // Lets the application shut down. Only close the client when you are completely done with it.
+//                s3AsyncClient.close();
+//            }
+//        });
+//
+//        future.join();
+//        return "test";
     }
 }

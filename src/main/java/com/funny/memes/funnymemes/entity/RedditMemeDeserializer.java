@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.springframework.util.StringUtils;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;
@@ -29,7 +30,11 @@ public class RedditMemeDeserializer extends StdDeserializer<Meme> {
             boolean isSelfPost = data.get("is_self").asBoolean();
             if (isSelfPost) return null;
 
-            meme.setImagePath(data.get("url").toString());
+            String url = data.get("url").toString();
+            if (!StringUtils.isEmpty(url) && url.contains("\"")) {
+                url = url.replaceAll("\"", "");
+            }
+            meme.setImagePath(url);
             meme.setAuthorName(data.get("author").toString());
             meme.setPublishDate(new Date(data.get("created_utc").asLong()));
             meme.setScore(data.get("score").intValue());

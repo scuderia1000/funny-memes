@@ -89,12 +89,37 @@ public class MemeParseServiceImpl implements MemeParseService {
         List<Meme> memes = new ArrayList<>();
         try {
             memes = memesFeature.get();
+            memes.remove(null);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        if (!memes.isEmpty()) {
 
-        }
+        CompletableFuture<String> featureMeme = memes.stream()
+                .map(meme -> {
+                    String imagePath = meme.getImagePath();
+                    if (!StringUtils.isEmpty(imagePath)) {
+                        String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+                        if ("jpg".equals(extension) || "jpeg".equals(extension)) {
+                            String fileName = fileService.downloadImage(imagePath);
+                            if (!StringUtils.isEmpty(fileName)) {
+                                fileService.uploadMediaToS3(fileName);
+                            }
+                        }
+                    }
+                    return null;
+                });
+//        for (Meme meme : memes) {
+//            String imagePath = meme.getImagePath();
+//            if (!StringUtils.isEmpty(imagePath)) {
+//                String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+//                if ("jpg".equals(extension) || "jpeg".equals(extension)) {
+//                    String fileName = fileService.downloadImage(imagePath);
+//                    if (!StringUtils.isEmpty(fileName)) {
+//                        String s3Url = fileService.uploadMediaToS3(fileName);
+//                    }
+//                }
+//            }
+//        }
 
 //        });
 //        CompletableFuture<?> [] features = new CompletableFuture<?>[propertyRedditGroups.size()];
