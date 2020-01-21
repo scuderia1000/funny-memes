@@ -61,7 +61,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String uploadMediaToS3(String fileName) {
+    public CompletableFuture<String> uploadMediaToS3(String fileName) {
         LOG.debug("Start upload file {} to s3", fileName);
 
         String key = fileName;
@@ -84,16 +84,23 @@ public class FileServiceImpl implements FileService {
                 // Lets the application shut down. Only close the client when you are completely done with it.
                 s3AsyncClient.close();
             }
-        }).thenApply(resp -> {
+        });
+//                .thenApply(resp -> {
+//            final URL reportUrl = s3AsyncClient.utilities()
+//                    .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
+//            LOG.info("Put object url: {}", reportUrl.toString());
+//
+//            return reportUrl.toString();
+//        }).join();
+        CompletableFuture<String> result = future.thenApply(resp -> {
             final URL reportUrl = s3AsyncClient.utilities()
                     .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
             LOG.info("Put object url: {}", reportUrl.toString());
 
             return reportUrl.toString();
         });
-
         future.join();
 
-        return "test";
+        return result;
     }
 }

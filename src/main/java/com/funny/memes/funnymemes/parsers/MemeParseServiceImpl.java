@@ -91,6 +91,7 @@ public class MemeParseServiceImpl implements MemeParseService {
         List<Meme> memes = new ArrayList<>();
         try {
             memes = memesFuture.get();
+            memes.remove(null);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -104,10 +105,14 @@ public class MemeParseServiceImpl implements MemeParseService {
                         if ("jpg".equals(extension) || "jpeg".equals(extension)) {
                             String fileName = fileService.downloadImage(imagePath);
                             if (!StringUtils.isEmpty(fileName)) {
-//                                return fileService.uploadMediaToS3(fileName);
-                                String s3ImageUrl = fileService.uploadMediaToS3(fileName);
-                                meme.setMediaUrl(s3ImageUrl);
-                                // удалить файл
+                                fileService.uploadMediaToS3(fileName)
+                                        .thenAccept(s3url -> {
+                                            LOG.debug("Result from uploadMediaToS3 is: {}", s3url);
+
+                                            meme.setMediaUrl(s3url);
+                                            // удалить файл
+
+                                        });
 
 
                             }
@@ -117,72 +122,11 @@ public class MemeParseServiceImpl implements MemeParseService {
                     return meme;
 //                    return null;
                 }).collect(toList());
-//        for (Meme meme : memes) {
-//            String imagePath = meme.getImagePath();
-//            if (!StringUtils.isEmpty(imagePath)) {
-//                String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-//                if ("jpg".equals(extension) || "jpeg".equals(extension)) {
-//                    String fileName = fileService.downloadImage(imagePath);
-//                    if (!StringUtils.isEmpty(fileName)) {
-//                        String s3Url = fileService.uploadMediaToS3(fileName);
-//                    }
-//                }
-//            }
-//        }
 
-//        });
-//        CompletableFuture<?> [] features = new CompletableFuture<?>[propertyRedditGroups.size()];
-//        int i = 0;
-//        for (String groupName : propertyRedditGroups) {
-//            LOG.info("Start process reddit group name: {}", groupName);
-//
-//            String redditGroupUrl = groupName + redditPostfix;
-//            features.add(parseProcessor.startParseProcessing(redditGroupUrl));
+        for (Meme meme : memes) {
+            System.out.println("Meme s3 url: " + meme.getMediaUrl());
+        }
 
-
-//            features[i] = parseProcessor.startParseProcessing(redditGroupUrl);
-//            i++;
-//            parseProcesList.add(parseProcessor.startParseProcessing(redditGroupUrl.toString()));
-//            CompletableFuture<List<Meme>> page1 = gitHubLookupService.findUser("PivotalSoftware");
-//            parseProcessor.startParseProcessing(redditGroupUrl.toString());
-
-//        }
-
-//        parseProcesList.toArray()
-//        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0]))
-//                .thenAccept(justVoid -> {
-//                    final List<Meme> memes = features.stream()
-//                            .flatMap(completableFuture -> completableFuture.join().stream())
-//                            .collect(toList());
-//                    if (!memes.isEmpty()) {
-//                        memes.remove(null);
-//                        for (Meme meme : memes) {
-//                            String imagePath = meme.getImagePath();
-//                            if (!StringUtils.isEmpty(imagePath)) {
-//                                if (imagePath.contains("\"")) {
-//                                    imagePath = imagePath.replaceAll("\"", "");
-//                                }
-//                                String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-//                                if ("jpg".equals(extension) || "jpeg".equals(extension)) {
-//                                    String fileName = fileService.downloadImage(imagePath);
-//                                    if (!StringUtils.isEmpty(fileName)) {
-//                                        String s3Url = fileService.uploadMediaToS3(fileName);
-//                                        if (!StringUtils.isEmpty(s3Url)) {
-//
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                });
-//        CompletableFuture.allOf(features.toArray(new CompletableFuture<?>[0])).join();
-//        List<Meme> memes = features.stream()
-//                .map(CompletableFuture::join)
-//                .map(justVoid -> {
-//
-//                })
-//                .collect(toList());
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
 //        synchronized (lock){
 //            canRestart = true;
