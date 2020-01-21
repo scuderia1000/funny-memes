@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -81,20 +83,20 @@ public class MemeParseServiceImpl implements MemeParseService {
                 features.toArray(new CompletableFuture[0])
         );
 
-        CompletableFuture<List<Meme>> memesFeature = allFutures
+        CompletableFuture<List<Meme>> memesFuture = allFutures
                 .thenApply(justVoid -> features.stream()
                         .flatMap(feature -> feature.join().stream())
                         .collect(toList())
                 );
         List<Meme> memes = new ArrayList<>();
         try {
-            memes = memesFeature.get();
-            memes.remove(null);
+            memes = memesFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
-        CompletableFuture<String> featureMeme = memes.stream()
+        memes = memes.stream()
+                .filter(Objects::nonNull)
                 .map(meme -> {
                     String imagePath = meme.getImagePath();
                     if (!StringUtils.isEmpty(imagePath)) {
@@ -102,12 +104,19 @@ public class MemeParseServiceImpl implements MemeParseService {
                         if ("jpg".equals(extension) || "jpeg".equals(extension)) {
                             String fileName = fileService.downloadImage(imagePath);
                             if (!StringUtils.isEmpty(fileName)) {
-                                fileService.uploadMediaToS3(fileName);
+//                                return fileService.uploadMediaToS3(fileName);
+                                String s3ImageUrl = fileService.uploadMediaToS3(fileName);
+                                meme.setMediaUrl(s3ImageUrl);
+                                // удалить файл
+
+
                             }
                         }
                     }
-                    return null;
-                });
+                    LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
+                    return meme;
+//                    return null;
+                }).collect(toList());
 //        for (Meme meme : memes) {
 //            String imagePath = meme.getImagePath();
 //            if (!StringUtils.isEmpty(imagePath)) {

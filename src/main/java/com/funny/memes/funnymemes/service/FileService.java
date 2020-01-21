@@ -8,6 +8,6 @@ public interface FileService {
 
     String downloadImage(String url);
 
-    CompletableFuture<PutObjectResponse> uploadMediaToS3(String fileName);
-//    String uploadMediaToS3(String fileName);
+//    CompletableFuture<PutObjectResponse> uploadMediaToS3(String fileName);
+    String uploadMediaToS3(String fileName);
 }
