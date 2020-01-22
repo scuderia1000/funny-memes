@@ -86,25 +86,6 @@ public class ParseProcessorImpl implements ParseProcessor {
 
                             LOG.debug("ParseProcessor ({}): Parsing reddit group \"{}\" completed", Thread.currentThread().getName(), redditGroupName);
 
-//                                List<Meme> memes = objectMapper.readValue(children, new TypeReference<List<Meme>>() {});
-//                                if (memes != null && !memes.isEmpty()) {
-//                                    memes.remove(null);
-//                                    for (Meme meme : memes) {
-//                                        String imagePath = meme.getImagePath();
-//                                        if (!StringUtils.isEmpty(imagePath)) {
-//                                            if (imagePath.contains("\"")) {
-//                                                imagePath = imagePath.replaceAll("\"", "");
-//                                            }
-//                                            String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-//                                            if ("jpg".equals(extension) || "jpeg".equals(extension)) {
-//                                                String fileName = fileService.downloadImage(imagePath);
-//                                                if (!StringUtils.isEmpty(fileName)) {
-//                                                    String s3Url = fileService.uploadMediaToS3(fileName);
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                }
                         } catch (IOException e) {
                             LOG.debug("IOException in ParseProcessor ({}) while parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
                             e.printStackTrace();

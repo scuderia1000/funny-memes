@@ -9,17 +9,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import javax.annotation.PreDestroy;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -75,6 +73,16 @@ public class MemeParseServiceImpl implements MemeParseService {
             canRestart = false;
         }
 
+        try {
+            fileService.getAllBucketObjects().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        if (!fileService.getFilesMd5Sums().isEmpty()) {
+
+        }
+
         List<CompletableFuture<List<Meme>>> features = propertyRedditGroups.stream()
                 .map(groupName -> parseProcessor.startParseProcessing(groupName + redditPostfix))
                 .collect(toList());
@@ -98,31 +106,31 @@ public class MemeParseServiceImpl implements MemeParseService {
 
         memes = memes.stream()
                 .filter(Objects::nonNull)
-                .map(meme -> {
+                .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
+                .filter(meme -> {
                     String imagePath = meme.getImagePath();
-                    if (!StringUtils.isEmpty(imagePath)) {
-                        String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-                        if ("jpg".equals(extension) || "jpeg".equals(extension)) {
-                            String fileName = fileService.downloadImage(imagePath);
-                            if (!StringUtils.isEmpty(fileName)) {
-                                fileService.uploadMediaToS3(fileName)
-                                        .thenAccept(s3url -> {
-                                            LOG.debug("Result from uploadMediaToS3 is: {}", s3url);
+                    String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
 
-                                            if (!StringUtils.isEmpty(s3url)) {
-                                                meme.setMediaUrl(s3url);
-                                                // удалить файл
-                                            }
+                    return "jpg".equals(extension) || "jpeg".equals(extension);
+                })
+                .filter(meme -> {
+                    String fileName = fileService.downloadImage(meme.getImagePath());
 
-                                        });
+                    if (!StringUtils.isEmpty(fileName)) {
+                        try {
+                            String s3url = fileService.uploadMediaToS3(fileName).get();
+                            if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
+                                meme.setMediaUrl(s3url);
+                                LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
 
-
+                                return true;
                             }
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
                         }
                     }
-                    LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
-                    return meme;
-//                    return null;
+
+                    return false;
                 }).collect(toList());
 
         for (Meme meme : memes) {
