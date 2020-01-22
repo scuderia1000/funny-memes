@@ -109,8 +109,10 @@ public class MemeParseServiceImpl implements MemeParseService {
                                         .thenAccept(s3url -> {
                                             LOG.debug("Result from uploadMediaToS3 is: {}", s3url);
 
-                                            meme.setMediaUrl(s3url);
-                                            // удалить файл
+                                            if (!StringUtils.isEmpty(s3url)) {
+                                                meme.setMediaUrl(s3url);
+                                                // удалить файл
+                                            }
 
                                         });
 

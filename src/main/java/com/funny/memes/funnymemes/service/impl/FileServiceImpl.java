@@ -72,32 +72,31 @@ public class FileServiceImpl implements FileService {
                         .build(),
                 AsyncRequestBody.fromFile(Paths.get(fileName))
         );
-        future.whenComplete((resp, err) -> {
-            try {
-                if (resp != null) {
-                    LOG.info("Put object response: {}", resp);
-                } else {
-                    // Handle error
-                    err.printStackTrace();
+        future.handle((resp, err) -> {
+//            throw new IllegalArgumentException("Error in thenApply");
+//            try {
+                if (err != null) {
+                    LOG.error("Exception in uploadMediaToS3 while put file to s3 bucket: {}", err.getMessage());
                 }
-            } finally {
-                // Lets the application shut down. Only close the client when you are completely done with it.
-                s3AsyncClient.close();
-            }
+                return resp;
+//            } finally {
+//                // Lets the application shut down. Only close the client when you are completely done with it.
+//                s3AsyncClient.close();
+//            }
         });
-//                .thenApply(resp -> {
+
+        CompletableFuture<String> result = future.thenApply(resp -> {
+            String url = "";
+            if (resp != null) {
+                url = s3AsyncClient.utilities()
+                        .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build()).toString();
+                LOG.info("Put object url: {}", url);
+            }
 //            final URL reportUrl = s3AsyncClient.utilities()
 //                    .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
-//            LOG.info("Put object url: {}", reportUrl.toString());
-//
-//            return reportUrl.toString();
-//        }).join();
-        CompletableFuture<String> result = future.thenApply(resp -> {
-            final URL reportUrl = s3AsyncClient.utilities()
-                    .getUrl(GetUrlRequest.builder().bucket(amazonBucketName).key(key).build());
-            LOG.info("Put object url: {}", reportUrl.toString());
+            s3AsyncClient.close();
 
-            return reportUrl.toString();
+            return url;
         });
         future.join();
 
