@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
  */
 public interface ParseProcessor {
 
-//    void startParseProcessing(String redditGroupName);
-    CompletableFuture<List<Meme>> startParseProcessing(String redditGroupName);
+//    List<Meme> getRedditGroupsContent(String redditGroupName);
 
+    void processRedditGroups();
 }

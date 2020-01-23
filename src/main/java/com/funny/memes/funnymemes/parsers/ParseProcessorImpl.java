@@ -21,10 +21,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Author: Valentin Ershov
@@ -35,15 +42,20 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     private final static Logger LOG = LoggerFactory.getLogger(ParseProcessorImpl.class);
 
+    @Value("#{'${reddit.group}'.split(',')}")
+    private List<String> propertyRedditGroups;
+
+    @Value("${reddit.postfix}")
+    private String redditPostfix;
+
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     private FileService fileService;
 
-    @Async
-    @Override
-    public CompletableFuture<List<Meme>> startParseProcessing(String redditGroupName) {
+//    @Override
+    private List<Meme> getRedditGroupsContent(String redditGroupName) {
         LOG.debug("ParseProcessor ({}): Start parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
 
         List<Meme> memes = new ArrayList<>();
@@ -94,11 +106,61 @@ public class ParseProcessorImpl implements ParseProcessor {
                 }
             }
         }
-        return CompletableFuture.completedFuture(memes).exceptionally(ex -> {
-            LOG.debug("Exception in ParseProcessor ({}) while parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
-            ex.printStackTrace();
 
-            return new ArrayList<>();
-        });
+        return memes;
+//        return CompletableFuture.completedFuture(memes).exceptionally(ex -> {
+//            LOG.debug("Exception in ParseProcessor ({}) while parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
+//            ex.printStackTrace();
+//
+//            return new ArrayList<>();
+//        });
+    }
+
+    @Async
+    @Override
+    public void processRedditGroups() {
+        List<Meme> memes = propertyRedditGroups.stream()
+                .flatMap(groupName -> getRedditGroupsContent(groupName + redditPostfix).stream())
+                .collect(toList());
+
+        List<Meme> uniqueMemes = memes.stream()
+                .filter(Objects::nonNull)
+                .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
+                .filter(meme -> {
+                    String imagePath = meme.getImagePath();
+                    String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+
+                    return "jpg".equals(extension) || "jpeg".equals(extension);
+                })
+                .filter(meme -> {
+                    String fileName = fileService.downloadImage(meme.getImagePath());
+
+                    if (!StringUtils.isEmpty(fileName)) {
+                        try {
+                            String s3url = fileService.uploadMediaToS3(fileName).get();
+                            if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
+                                meme.setMediaUrl(s3url);
+                                LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
+
+                                try {
+                                    Files.deleteIfExists(Paths.get(fileName));
+                                } catch (IOException x) {
+                                    LOG.error("Error delete file: {}", fileName);
+                                }
+
+                                return true;
+                            }
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    return false;
+                })
+                .collect(toList());
+
+        for (Meme meme : uniqueMemes) {
+            System.out.println("Meme s3 url: " + meme.getMediaUrl());
+        }
     }
 }

@@ -26,6 +26,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static com.funny.memes.funnymemes.config.Const.ERROR;
+import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -78,12 +80,13 @@ public class FileServiceImpl implements FileService {
         }
 
         if (filesMd5Sums.contains(localMd5Sum)) {
-            return CompletableFuture.completedFuture("File exist in s3");
+            return CompletableFuture.completedFuture(FILE_EXIST_IN_REMOTE_STORAGE);
         }
 
         LOG.debug("Start upload file {} to s3", fileName);
 
-        String key = UUID.randomUUID().toString();
+        String key = fileName;
+//        String key = UUID.randomUUID().toString();
 
         CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                 PutObjectRequest.builder()
@@ -123,7 +126,6 @@ public class FileServiceImpl implements FileService {
                 .build();
 
         CompletableFuture<ListObjectsResponse> responseFuture = s3AsyncClient.listObjects(listObjects);
-
         responseFuture.handle((resp, err) -> {
             if (err != null) {
                 LOG.error("Exception in getAllBucketObjects while get list of objects");
@@ -133,10 +135,12 @@ public class FileServiceImpl implements FileService {
         });
 
         CompletableFuture<String> result = responseFuture.thenApply(resp -> {
+            if (resp == null) {
+                return ERROR;
+            }
+
             List<S3Object> objects = resp.contents();
-
             filesMd5Sums.clear();
-
             filesMd5Sums.addAll(objects.stream()
                     .map(s3 -> {
                         String eTag = s3.eTag();
@@ -147,19 +151,6 @@ public class FileServiceImpl implements FileService {
                     })
                     .collect(toList())
             );
-
-//            for (ListIterator iterVals = objects.listIterator(); iterVals.hasNext(); ) {
-//                S3Object myValue = (S3Object) iterVals.next();
-//                System.out.print("\n The name of the key is " + myValue.key());
-//                System.out.print("\n The object is " + myValue.size());
-//                System.out.print("\n The owner is " + myValue.owner());
-//
-//                String eTag = myValue.eTag();
-//                if (eTag.contains("\"")) {
-//                    eTag = eTag.replaceAll("\"", "");
-//                }
-//                filesMd5Sums.add(eTag);
-//            }
 
             return "Complete";
         });
