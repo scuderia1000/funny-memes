@@ -49,8 +49,9 @@ public class FileServiceImpl implements FileService {
         return CompletableFuture.supplyAsync(() -> downloadImage(url));
     }
 
-    private String downloadImage(String url) {
-        LOG.debug("Start file downloading from url: {}", url);
+    @Override
+    public String downloadImage(String url) {
+        LOG.debug("File Service ({}): Start file downloading from url: {}", Thread.currentThread().getName(), url);
         String fileName = url.substring(url.lastIndexOf("/") + 1);
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
@@ -66,12 +67,12 @@ public class FileServiceImpl implements FileService {
                     }
                 }
             } catch (IOException ex) {
-                LOG.debug("Error downloading file from url: {}", url);
+                LOG.debug("File Service ({}): Error downloading file from url: {}", Thread.currentThread().getName(), url);
                 ex.printStackTrace();
                 return null;
             }
         }
-        LOG.debug("Complete file downloading from url: {}", url);
+        LOG.debug("File Service ({}): Complete file downloading from url: {}", Thread.currentThread().getName(), url);
         return fileName;
     }
 
@@ -81,14 +82,14 @@ public class FileServiceImpl implements FileService {
         try {
             localMd5Sum = BinaryUtils.toHex(Md5Utils.computeMD5Hash(Paths.get(fileName).toFile()));
         } catch (IOException e) {
-            LOG.error("Local file {} not found", fileName);
+            LOG.error("File Service ({}): Local file {} not found", Thread.currentThread().getName(), fileName);
         }
 
         if (filesMd5Sums.contains(localMd5Sum)) {
             return CompletableFuture.completedFuture(FILE_EXIST_IN_REMOTE_STORAGE);
         }
 
-        LOG.debug("Start upload file {} to s3", fileName);
+        LOG.debug("File Service ({}): Start upload file {} to s3", Thread.currentThread().getName(), fileName);
 
         String key = fileName;
 //        String key = UUID.randomUUID().toString();
@@ -102,7 +103,7 @@ public class FileServiceImpl implements FileService {
         );
         future.handle((resp, err) -> {
             if (err != null) {
-                LOG.error("Exception in uploadMediaToS3 while put file to s3 bucket: {}", err.getMessage());
+                LOG.error("File Service ({}): Exception in uploadMediaToS3 while put file to s3 bucket: {}", Thread.currentThread().getName(), err.getMessage());
             }
 
             return resp;
@@ -113,7 +114,7 @@ public class FileServiceImpl implements FileService {
             if (resp != null) {
                 url = s3AsyncClient.utilities()
                         .getUrl(GetUrlRequest.builder().bucket(awsS3BucketName).key(key).build()).toString();
-                LOG.info("Put object url: {}", url);
+                LOG.info("File Service ({}): Put object url: {}", Thread.currentThread().getName(), url);
             }
 
             return url;

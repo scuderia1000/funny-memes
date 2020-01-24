@@ -82,61 +82,13 @@ public class MemeParseServiceImpl implements MemeParseService {
         }
 
         if (!remoteStorageMd5Sums.equals(ERROR)) {
-            parseProcessor.processRedditGroups();
-            parseProcessor.processTwitterGroups();
-//            List<CompletableFuture<List<Meme>>> features = propertyRedditGroups.stream()
-//                    .map(groupName -> parseProcessor.getRedditGroupsContent(groupName + redditPostfix))
-//                    .collect(toList());
-//
-//            CompletableFuture<Void> allFutures = CompletableFuture.allOf(
-//                    features.toArray(new CompletableFuture[0])
-//            );
-//
-//            CompletableFuture<List<Meme>> memesFuture = allFutures
-//                    .thenApply(justVoid -> features.stream()
-//                            .flatMap(feature -> feature.join().stream())
-//                            .collect(toList())
-//                    );
-//            List<Meme> memes = new ArrayList<>();
-//            try {
-//                memes = memesFuture.get();
-//            } catch (InterruptedException | ExecutionException e) {
-//                e.printStackTrace();
-//            }
-//
-//            List<Meme> uniqueMemes = memes.stream()
-//                    .filter(Objects::nonNull)
-//                    .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
-//                    .filter(meme -> {
-//                        String imagePath = meme.getImagePath();
-//                        String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-//
-//                        return "jpg".equals(extension) || "jpeg".equals(extension);
-//                    })
-//                    .filter(meme -> {
-//                        String fileName = fileService.downloadImage(meme.getImagePath());
-//
-//                        if (!StringUtils.isEmpty(fileName)) {
-//                            try {
-//                                String s3url = fileService.uploadMediaToS3(fileName).get();
-//                                if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
-//                                    meme.setMediaUrl(s3url);
-//                                    LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
-//
-//                                    return true;
-//                                }
-//                            } catch (InterruptedException | ExecutionException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//
-//                        return false;
-//                    })
-//                    .collect(toList());
-//
-//            for (Meme meme : uniqueMemes) {
-//                System.out.println("Meme s3 url: " + meme.getMediaUrl());
-//            }
+            try {
+                parseProcessor.processRedditGroups();
+                parseProcessor.processTwitterGroups();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
         }
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
 //        synchronized (lock){

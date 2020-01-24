@@ -107,124 +107,64 @@ public class ParseProcessorImpl implements ParseProcessor {
             }
         }
 
-        return memes;
-//        return CompletableFuture.completedFuture(memes).exceptionally(ex -> {
-//            LOG.debug("Exception in ParseProcessor ({}) while parsing reddit group \"{}\"", Thread.currentThread().getName(), redditGroupName);
-//            ex.printStackTrace();
-//
-//            return new ArrayList<>();
-//        });
+        return memes.stream()
+                .filter(Objects::nonNull)
+                .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
+                .filter(meme -> {
+                    String imagePath = meme.getImagePath();
+                    String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+
+                    return "jpg".equals(extension) || "jpeg".equals(extension);
+                })
+                .collect(toList());
     }
 
     private CompletableFuture<List<Meme>> downloadGroupContent(String groupUrl) {
         return CompletableFuture.supplyAsync(() -> getRedditGroupsContent(groupUrl));
     }
 
+    private String getS3MediaUrl(Meme meme) {
+        String result = null;
+        String fileName = fileService.downloadImage(meme.getImagePath());
+        if (!StringUtils.isEmpty(fileName)) {
+            try {
+                String s3url = fileService.uploadMediaToS3(fileName).get();
+                if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
+                    result = s3url;
+                    try {
+                        Files.deleteIfExists(Paths.get(fileName));
+                    } catch (IOException x) {
+                        LOG.error("Error delete file: {}", fileName);
+                    }
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+    private CompletableFuture<List<Meme>> uploadGroupContents(List<Meme> memes) {
+        return CompletableFuture.supplyAsync(() -> memes.parallelStream()
+                .map(meme -> {
+                    String s3Url = getS3MediaUrl(meme);
+                    if (!StringUtils.isEmpty(s3Url)) {
+                        meme.setMediaUrl(s3Url);
+                        LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
+                    }
+                    return meme;
+                }).collect(toList()));
+    }
+
     @Async
     @Override
     public void processRedditGroups() throws ExecutionException, InterruptedException {
         for (String groupUrl : propertyRedditGroups) {
-            CompletableFuture<List<Meme>> contentFuture = downloadGroupContent(groupUrl + redditPostfix);
-            List<Meme> memesList = contentFuture
-                    .thenApply(memes -> memes.stream()
-                            .filter(Objects::nonNull)
-                            .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
-                            .filter(meme -> {
-                                String imagePath = meme.getImagePath();
-                                String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-
-                                return "jpg".equals(extension) || "jpeg".equals(extension);
-                            })
-                            .collect(toList()))
-                    .get();
-            for (Meme meme : memesList) {
-                fileService.downloadImageAsync(meme.getImagePath());
-            }
+            CompletableFuture<List<Meme>> contentFuture = downloadGroupContent(groupUrl + redditPostfix)
+                    .thenCompose(this::uploadGroupContents);
         }
-//        CompletableFuture<List<Meme>> memesFuture = propertyRedditGroups.stream()
-//                .flatMap(groupName -> downloadGroupContent(groupName + redditPostfix)).collect(toList());
-//                            .thenApply(memes -> memes.stream()
-//                                    .filter(Objects::nonNull)
-//                                    .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
-//                                    .filter(meme -> {
-//                                        String imagePath = meme.getImagePath();
-//                                        String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-//
-//                                        return "jpg".equals(extension) || "jpeg".equals(extension);
-//                                    }).collect(toList())
-//                            )
-//                ).collect(toList());
 
-//                                        .filter(meme -> {
-//                                            fileService.downloadImageAsync(meme.getImagePath())
-//                                                    .thenApply(fileName -> {
-//                                                        if (!StringUtils.isEmpty(fileName)) {
-//                                                            fileService.uploadMediaToS3(fileName)
-//                                                                    .thenApply(s3Url -> {
-//                                                                        if (!StringUtils.isEmpty(s3Url) && !s3Url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
-//                                                                            meme.setMediaUrl(s3Url);
-//                                                                            LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
-//                                                                            try {
-//                                                                                Files.deleteIfExists(Paths.get(fileName));
-//                                                                            } catch (IOException x) {
-//                                                                                LOG.error("Error delete file: {}", fileName);
-//                                                                            }
-//                                                                            return true;
-//                                                                        }
-//                                                                        return false;
-//                                                                    });
-//                                                        }
-//                                                        return false;
-//                                                    });
-//
-//                                        })
-
-//                )
-//                .collect(toList());
-
-//        List<Meme> memes = propertyRedditGroups.stream()
-//                .flatMap(groupName -> getRedditGroupsContent(groupName + redditPostfix).stream())
-//                .collect(toList());
-
-//        List<Meme> uniqueMemes = memes.stream()
-////                .filter(Objects::nonNull)
-////                .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
-////                .filter(meme -> {
-////                    String imagePath = meme.getImagePath();
-////                    String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
-////
-////                    return "jpg".equals(extension) || "jpeg".equals(extension);
-////                })
-//                .filter(meme -> {
-//                    String fileName = fileService.downloadImage(meme.getImagePath());
-//
-//                    if (!StringUtils.isEmpty(fileName)) {
-//                        try {
-//                            String s3url = fileService.uploadMediaToS3(fileName).get();
-//                            if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
-//                                meme.setMediaUrl(s3url);
-//                                LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
-//
-////                                try {
-////                                    Files.deleteIfExists(Paths.get(fileName));
-////                                } catch (IOException x) {
-////                                    LOG.error("Error delete file: {}", fileName);
-////                                }
-//
-//                                return true;
-//                            }
-//                        } catch (InterruptedException | ExecutionException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                    return false;
-//                })
-//                .collect(toList());
-//
-//        for (Meme meme : uniqueMemes) {
-//            System.out.println("Meme s3 url: " + meme.getMediaUrl());
-//        }
     }
 
     @Override
