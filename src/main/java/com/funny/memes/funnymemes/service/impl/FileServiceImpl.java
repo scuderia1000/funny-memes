@@ -1,5 +1,6 @@
 package com.funny.memes.funnymemes.service.impl;
 
+import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,11 @@ public class FileServiceImpl implements FileService {
     private String awsS3BucketName;
 
     @Override
-    public String downloadImage(String url) {
+    public CompletableFuture<String> downloadImageAsync(String url) {
+        return CompletableFuture.supplyAsync(() -> downloadImage(url));
+    }
+
+    private String downloadImage(String url) {
         LOG.debug("Start file downloading from url: {}", url);
         String fileName = url.substring(url.lastIndexOf("/") + 1);
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);

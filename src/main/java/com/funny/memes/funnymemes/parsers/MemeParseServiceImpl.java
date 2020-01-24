@@ -83,6 +83,7 @@ public class MemeParseServiceImpl implements MemeParseService {
 
         if (!remoteStorageMd5Sums.equals(ERROR)) {
             parseProcessor.processRedditGroups();
+            parseProcessor.processTwitterGroups();
 //            List<CompletableFuture<List<Meme>>> features = propertyRedditGroups.stream()
 //                    .map(groupName -> parseProcessor.getRedditGroupsContent(groupName + redditPostfix))
 //                    .collect(toList());

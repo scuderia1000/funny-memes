@@ -8,11 +8,13 @@ import java.util.concurrent.Future;
 
 public interface FileService {
 
-    String downloadImage(String url);
+//    String downloadImage(String url);
 
     CompletableFuture<String> uploadMediaToS3(String fileName);
 
     CompletableFuture<String> getAllBucketObjects();
 
     List<String> getFilesMd5Sums();
+
+    CompletableFuture<String> downloadImageAsync(String url);
 }
