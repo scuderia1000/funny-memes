@@ -15,6 +15,6 @@ public interface ParseProcessor {
 
 //    List<Meme> getRedditGroupsContent(String redditGroupName);
 
-    void processRedditGroups() throws ExecutionException, InterruptedException;
+    CompletableFuture<List<Meme>> processRedditGroups() throws ExecutionException, InterruptedException;
     void processTwitterGroups();
 }

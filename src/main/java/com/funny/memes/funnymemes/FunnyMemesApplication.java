@@ -33,52 +33,8 @@ public class FunnyMemesApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		LOG.info("deleteAll from repository");
 		repository.deleteAll();
-
-		LOG.info("Create new meme");
-
-		Meme meme = new Meme();
-		meme.setImagePath("http://test.com/image_1.jpg");
-		meme.setDescription("First meme description");
-		meme.setPublishDate(new Date());
-
-		repository.save(meme);
-
-		LOG.info("Meme saved: {}", meme.toString());
-
-//		List<Bucket> buckets = s3Client.listBuckets();
-//		for (Bucket bucket : buckets) {
-//			System.out.println("Bucket name: " + bucket.getName());
-//
-//		}
-
-//		testAsyncAnnotationForMethodsWithReturnType();
-//		testAsyncAnnotationForMethodsWithException();
 	}
-
-//
-//	public void testAsyncAnnotationForMethodsWithReturnType()
-//			throws InterruptedException, ExecutionException {
-//		System.out.println("Invoking an asynchronous method. "
-//				+ Thread.currentThread().getName());
-//
-//		Future<String> future = memesParserThread.asyncMethodWithReturnType();
-//
-//		while (true) {
-//			if (future.isDone()) {
-//				System.out.println("Result from asynchronous process - " + future.get());
-//				break;
-//			}
-//			System.out.println("Continue doing something else. ");
-//			Thread.sleep(1000);
-//		}
-//	}
-//
-//	public void testAsyncAnnotationForMethodsWithException() throws Exception {
-//		System.out.println("Start - invoking an asynchronous method. ");
-//		memesParserThread.asyncMethodWithExceptions();
-//		System.out.println("End - invoking an asynchronous method. ");
-//	}
-
 
 }

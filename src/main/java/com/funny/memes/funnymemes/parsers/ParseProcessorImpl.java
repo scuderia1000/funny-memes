@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.entity.RedditMemeDeserializer;
 import com.funny.memes.funnymemes.service.FileService;
+import com.funny.memes.funnymemes.service.MemeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
 import static java.util.stream.Collectors.toList;
@@ -53,6 +52,9 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private MemeService memeService;
 
     //    @Override
     private List<Meme> getRedditGroupsContent(String redditGroupName) {
@@ -154,17 +156,22 @@ public class ParseProcessorImpl implements ParseProcessor {
                         LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
                     }
                     return meme;
-                }).collect(toList()));
+                })
+                .filter(meme -> !StringUtils.isEmpty(meme.getMediaUrl()))
+                .collect(toList()));
     }
 
     @Async
     @Override
-    public void processRedditGroups() throws ExecutionException, InterruptedException {
+    public CompletableFuture<List<Meme>> processRedditGroups() throws ExecutionException, InterruptedException {
+        List<Meme> result = new ArrayList<>();
         for (String groupUrl : propertyRedditGroups) {
-            CompletableFuture<List<Meme>> contentFuture = downloadGroupContent(groupUrl + redditPostfix)
+            CompletableFuture<List<Meme>> memesFuture = downloadGroupContent(groupUrl + redditPostfix)
                     .thenCompose(this::uploadGroupContents);
+            result.addAll(memeService.saveMemes(memesFuture.get()));
         }
 
+        return CompletableFuture.completedFuture(result);
     }
 
     @Override

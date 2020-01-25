@@ -86,6 +86,8 @@ public class FileServiceImpl implements FileService {
         }
 
         if (filesMd5Sums.contains(localMd5Sum)) {
+            LOG.error("File Service ({}): File {} exist in s3", Thread.currentThread().getName(), fileName);
+
             return CompletableFuture.completedFuture(FILE_EXIST_IN_REMOTE_STORAGE);
         }
 
@@ -114,7 +116,7 @@ public class FileServiceImpl implements FileService {
             if (resp != null) {
                 url = s3AsyncClient.utilities()
                         .getUrl(GetUrlRequest.builder().bucket(awsS3BucketName).key(key).build()).toString();
-                LOG.info("File Service ({}): Put object url: {}", Thread.currentThread().getName(), url);
+                LOG.info("File Service ({}): Complete upload file {} to s3, file url: {}", Thread.currentThread().getName(), key, url);
             }
 
             return url;

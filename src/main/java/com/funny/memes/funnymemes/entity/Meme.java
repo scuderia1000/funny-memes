@@ -74,4 +74,17 @@ public class Meme {
     public void setMediaUrl(String mediaUrl) {
         this.mediaUrl = mediaUrl;
     }
+
+    @Override
+    public String toString() {
+        return "Meme{" +
+                "id='" + id + '\'' +
+                ", authorName='" + authorName + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", mediaUrl='" + mediaUrl + '\'' +
+                ", publishDate=" + publishDate +
+                ", description='" + description + '\'' +
+                ", score=" + score +
+                '}';
+    }
 }
