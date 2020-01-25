@@ -84,6 +84,7 @@ public class MemeParseServiceImpl implements MemeParseService {
         if (!remoteStorageMd5Sums.equals(ERROR)) {
             try {
                 CompletableFuture<List<Meme>> redditResult = parseProcessor.processRedditGroups();
+                // TODO сделать так, чтобы поток не ждал этот результат
                 for (Meme meme : redditResult.get()) {
                     System.out.println("Saved Reddit meme" + meme.toString());
                 }

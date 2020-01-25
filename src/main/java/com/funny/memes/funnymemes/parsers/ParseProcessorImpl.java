@@ -133,11 +133,12 @@ public class ParseProcessorImpl implements ParseProcessor {
                 String s3url = fileService.uploadMediaToS3(fileName).get();
                 if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
                     result = s3url;
-                    try {
-                        Files.deleteIfExists(Paths.get(fileName));
-                    } catch (IOException x) {
-                        LOG.error("Error delete file: {}", fileName);
-                    }
+                }
+
+                try {
+                    Files.deleteIfExists(Paths.get(fileName));
+                } catch (IOException x) {
+                    LOG.error("Error delete file: {}", fileName);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
