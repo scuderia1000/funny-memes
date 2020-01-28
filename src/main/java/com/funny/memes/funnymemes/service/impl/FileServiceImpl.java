@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.utils.BinaryUtils;
 import software.amazon.awssdk.utils.Md5Utils;
@@ -40,6 +41,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private S3AsyncClient s3AsyncClient;
+
+    @Autowired
+    private S3Client s3Client;
 
     @Value("${app.awsServices.bucketName}")
     private String awsS3BucketName;
@@ -127,7 +131,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public CompletableFuture<String> getAllBucketObjects() {
+    public CompletableFuture<String> getAllBucketObjectsAsync() {
         ListObjectsRequest listObjects = ListObjectsRequest
                 .builder()
                 .bucket(awsS3BucketName)
@@ -136,7 +140,7 @@ public class FileServiceImpl implements FileService {
         CompletableFuture<ListObjectsResponse> responseFuture = s3AsyncClient.listObjects(listObjects);
         responseFuture.handle((resp, err) -> {
             if (err != null) {
-                LOG.error("Exception in getAllBucketObjects while get list of objects");
+                LOG.error("Exception in getAllBucketObjectsAsync while get list of objects");
             }
 
             return resp;
@@ -166,6 +170,49 @@ public class FileServiceImpl implements FileService {
         responseFuture.join();
 
         return result;
+    }
+
+    @Override
+    public List<String> getAllBucketObjects() {
+        List<String> result = new ArrayList<>();
+        try {
+            ListObjectsRequest listObjects = ListObjectsRequest
+                    .builder()
+                    .bucket(awsS3BucketName)
+                    .build();
+
+            ListObjectsResponse res = s3Client.listObjects(listObjects);
+            List<S3Object> objects = res.contents();
+
+            result.addAll(
+                    objects.stream()
+                    .map(S3Object::key)
+                    .collect(toList())
+            );
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+        return result;
+    }
+
+    @Override
+    public void deleteBucketObject(String key) {
+        LOG.debug("Start deleting object {} from aws s3 bucket", key);
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(awsS3BucketName).key(key).build();
+        s3Client.deleteObject(deleteObjectRequest);
+        LOG.debug("Deleting object {} from aws s3 bucket complete", key);
+    }
+
+    @Override
+    public void deleteAllBucketObjects() {
+        LOG.debug("Start deleting all data from aws s3 bucket");
+        List<String> fileKeys = getAllBucketObjects();
+        for (String key : fileKeys) {
+            deleteBucketObject(key);
+        }
+        LOG.debug("Deleting all data from aws s3 bucket complete");
     }
 
     @Override

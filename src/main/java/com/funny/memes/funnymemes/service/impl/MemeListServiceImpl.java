@@ -6,6 +6,7 @@ import com.funny.memes.funnymemes.service.MemeListService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class MemeListServiceImpl implements MemeListService {
 
     @Override
     public List<MemeList> findAll() {
-        List<MemeList> memes = repository.findAll();
+        List<MemeList> memes = repository.findAll(Sort.by(Sort.Direction.DESC, "publishDate"));
 
         LOG.info("Memes count: {}", memes.size());
         return memes;

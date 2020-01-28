@@ -13,3 +13,8 @@ h1{
 h2{
     color:#FF0000;
 }
+
+.post-message {
+    display: flex;
+    flex-direction: column;
+}

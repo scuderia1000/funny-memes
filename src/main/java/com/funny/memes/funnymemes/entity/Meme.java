@@ -13,11 +13,12 @@ public class Meme {
     private String authorName;
     // url источника
     private String imagePath;
-    // url на фойловом хранилище
+    // url на файловом хранилище
     private String mediaUrl;
     private Date publishDate;
     private String description;
     private Integer score;
+    private String title;
 
     public String getId() {
         return id;
@@ -75,16 +76,11 @@ public class Meme {
         this.mediaUrl = mediaUrl;
     }
 
-    @Override
-    public String toString() {
-        return "Meme{" +
-                "id='" + id + '\'' +
-                ", authorName='" + authorName + '\'' +
-                ", imagePath='" + imagePath + '\'' +
-                ", mediaUrl='" + mediaUrl + '\'' +
-                ", publishDate=" + publishDate +
-                ", description='" + description + '\'' +
-                ", score=" + score +
-                '}';
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

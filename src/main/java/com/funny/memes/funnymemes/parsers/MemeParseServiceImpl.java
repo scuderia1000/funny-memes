@@ -8,18 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.funny.memes.funnymemes.config.Const.ERROR;
-import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Author: Valentin Ershov
@@ -76,7 +71,7 @@ public class MemeParseServiceImpl implements MemeParseService {
 
         String remoteStorageMd5Sums = "";
         try {
-            remoteStorageMd5Sums = fileService.getAllBucketObjects().get();
+            remoteStorageMd5Sums = fileService.getAllBucketObjectsAsync().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -84,7 +79,7 @@ public class MemeParseServiceImpl implements MemeParseService {
         if (!remoteStorageMd5Sums.equals(ERROR)) {
             try {
                 CompletableFuture<List<Meme>> redditResult = parseProcessor.processRedditGroups();
-                // TODO сделать так, чтобы поток не ждал этот результат
+                // TODO сделать так, чтобы поток не ждал этот результат, если будет необходимо
                 for (Meme meme : redditResult.get()) {
                     System.out.println("Saved Reddit meme" + meme.toString());
                 }
@@ -95,9 +90,9 @@ public class MemeParseServiceImpl implements MemeParseService {
 
         }
         LOG.debug("Parse service ({}): Parse process restarted", Thread.currentThread().getName());
-//        synchronized (lock){
-//            canRestart = true;
-//        }
+        synchronized (lock){
+            canRestart = true;
+        }
     }
 
     @PreDestroy

@@ -34,6 +34,10 @@ public class MemeServiceImpl implements MemeService {
     @Override
     @Transactional
     public List<Meme> saveMemes(List<Meme> memes) {
-        return repository.insert(memes);
+        List<Meme> savedMemes = repository.insert(memes);
+
+        LOG.info("Saved memes count: {}", savedMemes.size());
+
+        return savedMemes;
     }
 }

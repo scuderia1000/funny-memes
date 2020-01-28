@@ -1,5 +1,9 @@
 package com.funny.memes.funnymemes.parsers;
 
+import com.funny.memes.funnymemes.dao.MemeRepository;
+import com.funny.memes.funnymemes.service.FileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -12,12 +16,20 @@ import java.util.concurrent.Future;
 @Component
 public class AppListener implements ApplicationListener<ContextRefreshedEvent> {
 
+    private final static Logger LOG = LoggerFactory.getLogger(AppListener.class);
+
     private final static Object lock = new Object();
 
     private volatile boolean alreadyStarted = false;
 
     @Autowired
     private MemeParseService memeParseService;
+
+    @Autowired
+    private MemeRepository repository;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -26,31 +38,12 @@ public class AppListener implements ApplicationListener<ContextRefreshedEvent> {
             alreadyStarted = true;
         }
 
+        LOG.debug("Deleting all memes from repository");
+        repository.deleteAll();
+        LOG.debug("Deleting all memes from repository complete");
+
+        fileService.deleteAllBucketObjects();
+
         memeParseService.initialize();
     }
-
-    //    @Async
-//    public void asyncMethodWithVoidReturnType() {
-//        System.out.println("Execute method asynchronously. "
-//                + Thread.currentThread().getName());
-//    }
-//
-//    @Async
-//    public Future<String> asyncMethodWithReturnType() {
-//        System.out.println("Execute method asynchronously - "
-//                + Thread.currentThread().getName());
-//        try {
-//            Thread.sleep(5000);
-//            return new AsyncResult<String>("hello world !!!!");
-//        } catch (InterruptedException e) {
-//            //
-//        }
-//
-//        return null;
-//    }
-//
-//    @Async
-//    public void asyncMethodWithExceptions() throws Exception {
-//        throw new Exception("Throw message from asynchronous method. ");
-//    }
 }

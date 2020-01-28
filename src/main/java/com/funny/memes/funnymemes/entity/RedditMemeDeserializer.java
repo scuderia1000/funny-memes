@@ -38,6 +38,7 @@ public class RedditMemeDeserializer extends StdDeserializer<Meme> {
             meme.setAuthorName(data.get("author").toString());
             meme.setPublishDate(new Date(data.get("created_utc").asLong()));
             meme.setScore(data.get("score").intValue());
+            meme.setTitle(data.get("title").toString());
         }
 
         return meme;

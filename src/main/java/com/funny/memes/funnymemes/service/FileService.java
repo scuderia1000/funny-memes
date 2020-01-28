@@ -12,9 +12,15 @@ public interface FileService {
 
     CompletableFuture<String> uploadMediaToS3(String fileName);
 
-    CompletableFuture<String> getAllBucketObjects();
+    CompletableFuture<String> getAllBucketObjectsAsync();
+
+    List<String> getAllBucketObjects();
 
     List<String> getFilesMd5Sums();
 
     CompletableFuture<String> downloadImageAsync(String url);
+
+    void deleteBucketObject(String key);
+
+    void deleteAllBucketObjects();
 }

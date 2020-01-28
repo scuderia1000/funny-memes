@@ -7,6 +7,7 @@ import com.funny.memes.funnymemes.service.MemeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/feed")
+//@RestController
+@Controller
 public class MemeController {
 
     private final static Logger LOG = LoggerFactory.getLogger(MemeController.class);
@@ -37,10 +38,11 @@ public class MemeController {
 
         List<MemeList> memes = memeListService.findAll();
         model.addAttribute("message", "World!");
+        model.addAttribute("memes", memes);
         return "index";
     }
 
-    @RequestMapping(value = "/:{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/image/{id}", method = RequestMethod.GET)
     public Meme getMeme(@PathVariable String id) {
         LOG.info("Get meme by id request: {}", id);
         return memeService.findById(id);

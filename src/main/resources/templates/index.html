@@ -22,14 +22,21 @@
         </h2>
     </div>
 
-    <!--<ol>-->
-        <!--<li th:each="task : ${tasks}" th:text="${task}"></li>-->
-    <!--</ol>-->
+    <ul>
+        <li th:each="meme : ${memes}">
+            <div class="post-message">
+                <span th:text="${meme.title}"></span>
+                <a th:href="@{/image/{id}(id=${meme.id})}">
+                    <img th:src="${meme.mediaUrl}" th:alt="${meme.title}">
+                </a>
+            </div>
+        </li>
+    </ul>
 
 </main>
 <!-- /.container -->
 
-<script type="text/javascript" th:src="@{webjars/bootstrap/4.2.1/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{webjars/bootstrap/4.4.1/js/bootstrap.min.js}"></script>
 
 </body>
 </html>
