@@ -81,7 +81,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public CompletableFuture<String> uploadMediaToS3(String fileName) {
+    public CompletableFuture<String> uploadMediaToS3(String fileName, String lang) {
         String localMd5Sum = "";
         try {
             localMd5Sum = BinaryUtils.toHex(Md5Utils.computeMD5Hash(Paths.get(fileName).toFile()));
@@ -97,8 +97,7 @@ public class FileServiceImpl implements FileService {
 
         LOG.debug("File Service ({}): Start upload file {} to s3", Thread.currentThread().getName(), fileName);
 
-        String key = fileName;
-//        String key = UUID.randomUUID().toString();
+        String key = lang + "/" + fileName;
 
         CompletableFuture<PutObjectResponse> future = s3AsyncClient.putObject(
                 PutObjectRequest.builder()

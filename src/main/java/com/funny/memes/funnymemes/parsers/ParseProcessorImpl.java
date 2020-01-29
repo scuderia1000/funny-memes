@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.funny.memes.funnymemes.config.RedditGroupsProperties;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.entity.RedditMemeDeserializer;
 import com.funny.memes.funnymemes.service.FileService;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -41,8 +43,11 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     private final static Logger LOG = LoggerFactory.getLogger(ParseProcessorImpl.class);
 
-    @Value("#{'${reddit.group}'.split(',')}")
-    private List<String> propertyRedditGroups;
+//    @Value("#{'${reddit.group}'.split(',')}")
+//    private List<String> propertyRedditGroups;
+
+    @Autowired
+    private RedditGroupsProperties redditProperties;
 
     @Value("${reddit.postfix}")
     private String redditPostfix;
@@ -125,12 +130,12 @@ public class ParseProcessorImpl implements ParseProcessor {
         return CompletableFuture.supplyAsync(() -> getRedditGroupsContent(groupUrl));
     }
 
-    private String getS3MediaUrl(Meme meme) {
+    private String getS3MediaUrl(Meme meme, String lang) {
         String result = null;
         String fileName = fileService.downloadImage(meme.getImagePath());
         if (!StringUtils.isEmpty(fileName)) {
             try {
-                String s3url = fileService.uploadMediaToS3(fileName).get();
+                String s3url = fileService.uploadMediaToS3(fileName, lang).get();
                 if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
                     result = s3url;
                 }
@@ -148,10 +153,10 @@ public class ParseProcessorImpl implements ParseProcessor {
         return result;
     }
 
-    private CompletableFuture<List<Meme>> uploadGroupContents(List<Meme> memes) {
+    private CompletableFuture<List<Meme>> uploadGroupContents(List<Meme> memes, String lang) {
         return CompletableFuture.supplyAsync(() -> memes.parallelStream()
                 .map(meme -> {
-                    String s3Url = getS3MediaUrl(meme);
+                    String s3Url = getS3MediaUrl(meme, lang);
                     if (!StringUtils.isEmpty(s3Url)) {
                         meme.setMediaUrl(s3Url);
                         LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
@@ -166,10 +171,18 @@ public class ParseProcessorImpl implements ParseProcessor {
     @Override
     public CompletableFuture<List<Meme>> processRedditGroups() throws ExecutionException, InterruptedException {
         List<Meme> result = new ArrayList<>();
-        for (String groupUrl : propertyRedditGroups) {
-            CompletableFuture<List<Meme>> memesFuture = downloadGroupContent(groupUrl + redditPostfix)
-                    .thenCompose(this::uploadGroupContents);
-            result.addAll(memeService.saveMemes(memesFuture.get()));
+
+        String redditPostfix = redditProperties.getPostfix();
+
+        for (Map.Entry<String, List<String>> entry : redditProperties.getGroups().entrySet()) {
+
+            String lang = entry.getKey();
+
+            for (String groupUrl : entry.getValue()) {
+                CompletableFuture<List<Meme>> memesFuture = downloadGroupContent(groupUrl + redditPostfix)
+                        .thenCompose(memes -> uploadGroupContents(memes, lang));
+                result.addAll(memeService.saveMemes(memesFuture.get()));
+            }
         }
 
         return CompletableFuture.completedFuture(result);

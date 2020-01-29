@@ -10,7 +10,7 @@ public interface FileService {
 
     String downloadImage(String url);
 
-    CompletableFuture<String> uploadMediaToS3(String fileName);
+    CompletableFuture<String> uploadMediaToS3(String fileName, String lang);
 
     CompletableFuture<String> getAllBucketObjectsAsync();
 
