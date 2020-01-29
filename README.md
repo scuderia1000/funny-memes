@@ -30,6 +30,11 @@ Add bucket policy:
 In application.properties file change:<br/>
 ```json
 app.awsServices.bucketName=<your_bucket_name>
-  
-reddit.group= #you_can_add_your_own_groups
+```
+In application.yml file
+```json
+reddit:
+  groups:
+    <group lang>:
+      - <add your own groups>
 ```
