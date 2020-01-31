@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -14,7 +14,7 @@
     <span class="change-lang" th:text="#{language.change}"></span>:
     <select id="locales">
         <option value=""></option>
-        <option value="en" th:text="#{lang.ru}"></option>
+        <option value="ru" th:text="#{lang.ru}"></option>
         <option value="de" th:text="#{lang.de}"></option>
     </select>
 </nav>
@@ -51,6 +51,7 @@
 </main>
 <!-- /.container -->
 
+<script type="text/javascript" th:src="@{/js/changeLang.js}"></script>
 <script type="text/javascript" th:src="@{webjars/bootstrap/4.4.1/js/bootstrap.min.js}"></script>
 
 </body>

@@ -15,8 +15,9 @@ public class InternationalizationConfig implements WebMvcConfigurer {
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
-        slr.setDefaultLocale(Locale.forLanguageTag("ru_RU"));
-//        slr.setDefaultLocale(new Locale("ru"));
+//        slr.setDefaultLocale(Locale.US);
+        slr.setDefaultLocale(new Locale("ru", "RU"));
+//        slr.setDefaultLocale(new Locale("ru"));Locale.forLanguageTag("ru_RU")
         return slr;
     }
 
