@@ -14,6 +14,10 @@ h2{
     color:#FF0000;
 }
 
+.change-lang {
+    color: white;
+}
+
 .meme-container {
     background-color: #e5e5e5;
     max-width: 100%;

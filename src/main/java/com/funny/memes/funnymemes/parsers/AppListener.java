@@ -38,11 +38,11 @@ public class AppListener implements ApplicationListener<ContextRefreshedEvent> {
             alreadyStarted = true;
         }
 
-        LOG.debug("Deleting all memes from repository");
-        repository.deleteAll();
-        LOG.debug("Deleting all memes from repository complete");
-
-        fileService.deleteAllBucketObjects();
+//        LOG.debug("Deleting all memes from repository");
+//        repository.deleteAll();
+//        LOG.debug("Deleting all memes from repository complete");
+//
+//        fileService.deleteAllBucketObjects();
 
         memeParseService.initialize();
     }
