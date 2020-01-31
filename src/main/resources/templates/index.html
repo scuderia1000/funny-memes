@@ -16,22 +16,31 @@
 <main role="main" class="container">
 
     <div class="starter-template">
-        <h1>Deutsche Funny memes</h1>
+        <h1>Funny memes</h1>
         <h2>
-            <span th:text="'Hello, ' + ${message}"></span>
+            <!--<span th:text="'Hello, ' + ${message}"></span>-->
         </h2>
     </div>
 
-    <ul>
-        <li th:each="meme : ${memes}">
-            <div class="post-message">
-                <span th:text="${meme.title}"></span>
-                <a th:href="@{/image/{id}(id=${meme.id})}">
-                    <img th:src="${meme.mediaUrl}" th:alt="${meme.title}">
-                </a>
-            </div>
-        </li>
-    </ul>
+    <div class="meme-container">
+        <ul>
+            <li th:each="meme : ${memes}" class="meme-post-item">
+                <span th:text="${meme.title}" class="meme-title"></span>
+                <div class="score-container">
+                    <span class="score-text" th:text="${meme.score}"></span>
+                    <img class="score-like-icon" th:src="@{/images/svg/like.svg}"/>
+                </div>
+                <span class="score-date" th:text="${#dates.format(meme.publishDate, 'dd.MM.yyyy HH:mm')}"></span>
+                <div class="post-message">
+                    <a th:href="@{/image/{id}(id=${meme.id})}">
+                        <div class="meme-media-content">
+                            <img th:src="${meme.fullMediaUrl}" th:alt="${meme.title}" class="media-image">
+                        </div>
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
 
 </main>
 <!-- /.container -->

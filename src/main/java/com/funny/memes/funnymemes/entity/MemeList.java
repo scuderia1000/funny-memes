@@ -11,9 +11,12 @@ public class MemeList {
     @Id
     private String id;
     private String authorName;
-    private String mediaUrl;
+    private String fullMediaUrl;
+    private String previewUrl;
     private Date publishDate;
+    private Integer score;
     private String title;
+    private String lang;
 
     public String getId() {
         return id;
@@ -39,12 +42,12 @@ public class MemeList {
         this.authorName = authorName;
     }
 
-    public String getMediaUrl() {
-        return mediaUrl;
+    public String getFullMediaUrl() {
+        return fullMediaUrl;
     }
 
-    public void setMediaUrl(String mediaUrl) {
-        this.mediaUrl = mediaUrl;
+    public void setFullMediaUrl(String fullMediaUrl) {
+        this.fullMediaUrl = fullMediaUrl;
     }
 
     public String getTitle() {
@@ -53,5 +56,29 @@ public class MemeList {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

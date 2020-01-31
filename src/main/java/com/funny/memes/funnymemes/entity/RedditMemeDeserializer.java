@@ -1,13 +1,11 @@
 package com.funny.memes.funnymemes.entity;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.util.StringUtils;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.Date;
 
@@ -34,9 +32,9 @@ public class RedditMemeDeserializer extends StdDeserializer<Meme> {
             if (!StringUtils.isEmpty(url) && url.contains("\"")) {
                 url = url.replaceAll("\"", "");
             }
-            meme.setImagePath(url);
+            meme.setSourceMediaUrl(url);
             meme.setAuthorName(data.get("author").toString());
-            meme.setPublishDate(new Date(data.get("created_utc").asLong()));
+            meme.setPublishDate(new Date(data.get("created_utc").asLong() * 1000));
             meme.setScore(data.get("score").intValue());
             meme.setTitle(data.get("title").toString());
         }

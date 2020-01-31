@@ -12,13 +12,15 @@ public class Meme {
     private String id;
     private String authorName;
     // url источника
-    private String imagePath;
+    private String sourceMediaUrl;
     // url на файловом хранилище
-    private String mediaUrl;
+    private String fullMediaUrl;
+    private String previewUrl;
     private Date publishDate;
     private String description;
     private Integer score;
     private String title;
+    private String lang;
 
     public String getId() {
         return id;
@@ -36,12 +38,12 @@ public class Meme {
         this.authorName = authorName;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getSourceMediaUrl() {
+        return sourceMediaUrl;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setSourceMediaUrl(String sourceMediaUrl) {
+        this.sourceMediaUrl = sourceMediaUrl;
     }
 
     public Date getPublishDate() {
@@ -68,12 +70,12 @@ public class Meme {
         this.score = score;
     }
 
-    public String getMediaUrl() {
-        return mediaUrl;
+    public String getFullMediaUrl() {
+        return fullMediaUrl;
     }
 
-    public void setMediaUrl(String mediaUrl) {
-        this.mediaUrl = mediaUrl;
+    public void setFullMediaUrl(String fullMediaUrl) {
+        this.fullMediaUrl = fullMediaUrl;
     }
 
     public String getTitle() {
@@ -82,5 +84,21 @@ public class Meme {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

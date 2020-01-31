@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -116,9 +115,9 @@ public class ParseProcessorImpl implements ParseProcessor {
 
         return memes.stream()
                 .filter(Objects::nonNull)
-                .filter(meme -> !StringUtils.isEmpty(meme.getImagePath()))
+                .filter(meme -> !StringUtils.isEmpty(meme.getSourceMediaUrl()))
                 .filter(meme -> {
-                    String imagePath = meme.getImagePath();
+                    String imagePath = meme.getSourceMediaUrl();
                     String extension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
 
                     return "jpg".equals(extension) || "jpeg".equals(extension);
@@ -132,7 +131,7 @@ public class ParseProcessorImpl implements ParseProcessor {
 
     private String getS3MediaUrl(Meme meme, String lang) {
         String result = null;
-        String fileName = fileService.downloadImage(meme.getImagePath());
+        String fileName = fileService.downloadImage(meme.getSourceMediaUrl());
         if (!StringUtils.isEmpty(fileName)) {
             try {
                 String s3url = fileService.uploadMediaToS3(fileName, lang).get();
@@ -158,12 +157,13 @@ public class ParseProcessorImpl implements ParseProcessor {
                 .map(meme -> {
                     String s3Url = getS3MediaUrl(meme, lang);
                     if (!StringUtils.isEmpty(s3Url)) {
-                        meme.setMediaUrl(s3Url);
-                        LOG.debug("Meme s3 url is: {}", meme.getMediaUrl());
+                        meme.setFullMediaUrl(s3Url);
+                        meme.setLang(lang);
+                        LOG.debug("Meme s3 url is: {}", meme.getFullMediaUrl());
                     }
                     return meme;
                 })
-                .filter(meme -> !StringUtils.isEmpty(meme.getMediaUrl()))
+                .filter(meme -> !StringUtils.isEmpty(meme.getFullMediaUrl()))
                 .collect(toList()));
     }
 
