@@ -7,4 +7,6 @@ import java.util.List;
 public interface MemeListService {
 
     List<MemeList> findAll();
+
+    List<MemeList> findAllByLang(String lang);
 }

@@ -7,6 +7,6 @@ select.onchange = function(el) {
     var selectedOption = el.currentTarget.value;
     // var selectedOption = $('#locales').val();
     if (selectedOption !== ''){
-        window.location.replace('international?lang=' + selectedOption);
+        window.location.replace('?lang=' + selectedOption);
     }
 };
