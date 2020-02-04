@@ -19,6 +19,70 @@
     </select>
 </nav>
 
+<!--<template id="meme-item-template">-->
+    <!--<style>-->
+        <!--.meme-post-item {-->
+            <!--display: flex;-->
+            <!--flex-direction: column;-->
+            <!--/*align-items: center;*/-->
+            <!--/*justify-content: center;*/-->
+            <!--padding: 5px 5px 10px 20px;-->
+            <!--background-color: white;-->
+            <!--margin-bottom: 20px;-->
+            <!--border: 1px solid #ccc;-->
+            <!--border-radius: 4px;-->
+        <!--}-->
+        <!--.meme-title {-->
+            <!--font-weight: 500;-->
+            <!--font-size: 18px;-->
+        <!--}-->
+        <!--.score-container {-->
+            <!--display: flex;-->
+            <!--/*justify-content: center;*/-->
+            <!--align-items: center;-->
+            <!--padding: 5px;-->
+        <!--}-->
+        <!--.score-text,-->
+        <!--.score-date {-->
+            <!--font-size: 14px;-->
+            <!--font-weight: 500;-->
+            <!--margin-right: 5px;-->
+        <!--}-->
+        <!--.score-like-icon {-->
+            <!--width: 18px;-->
+        <!--}-->
+        <!--.post-message {-->
+            <!--display: flex;-->
+            <!--flex-direction: column;-->
+            <!--align-items: center;-->
+            <!--justify-content: center;-->
+            <!--max-height: 512px;-->
+        <!--}-->
+        <!--.meme-media-content {-->
+            <!--max-height: 478px;-->
+        <!--}-->
+
+        <!--.media-image {-->
+            <!--max-height: 400px;-->
+        <!--}-->
+    <!--</style>-->
+    <!--<li class="meme-post-item">-->
+        <!--<span class="meme-title"></span>-->
+        <!--<div class="score-container">-->
+            <!--<span class="score-text"></span>-->
+            <!--<img class="score-like-icon" src="../static/images/svg/like.svg" alt="like"/>-->
+        <!--</div>-->
+        <!--<span class="score-date"></span>-->
+        <!--<div class="post-message">-->
+            <!--<a href="#" id="meme-content-link">-->
+                <!--<div class="meme-media-content">-->
+                    <!--<img class="media-image">-->
+                <!--</div>-->
+            <!--</a>-->
+        <!--</div>-->
+    <!--</li>-->
+<!--</template>-->
+
 <main role="main" class="container">
 
     <div class="starter-template">
@@ -29,28 +93,34 @@
     </div>
 
     <div class="meme-container">
-        <ul>
-            <li th:each="meme : ${memes}" class="meme-post-item">
-                <span th:text="${meme.title}" class="meme-title"></span>
-                <div class="score-container">
-                    <span class="score-text" th:text="${meme.score}"></span>
-                    <img class="score-like-icon" th:src="@{/images/svg/like.svg}"/>
-                </div>
-                <span class="score-date" th:text="${#dates.format(meme.publishDate, 'dd.MM.yyyy HH:mm')}"></span>
-                <div class="post-message">
-                    <a th:href="@{/image/{id}(id=${meme.id})}">
-                        <div class="meme-media-content">
-                            <img th:src="${meme.fullMediaUrl}" th:alt="${meme.title}" class="media-image">
-                        </div>
-                    </a>
-                </div>
-            </li>
+        <ul id="infinite-list">
+
+            <!--<li class="meme-post-item" th:each="meme : ${memesPage.content}">-->
+                <!--<span th:text="${meme.title}" class="meme-title"></span>-->
+                <!--<div class="score-container">-->
+                    <!--<span class="score-text" th:text="${meme.score}"></span>-->
+                    <!--<img class="score-like-icon" th:src="@{/images/svg/like.svg}"/>-->
+                <!--</div>-->
+                <!--<span class="score-date" th:text="${#dates.format(meme.publishDate, 'dd.MM.yyyy HH:mm')}"></span>-->
+                <!--<div class="post-message">-->
+                    <!--<a th:href="@{/image/{id}(id=${meme.id})}">-->
+                        <!--<div class="meme-media-content">-->
+                            <!--<img th:src="${meme.fullMediaUrl}" th:alt="${meme.title}" class="media-image">-->
+                        <!--</div>-->
+                    <!--</a>-->
+                <!--</div>-->
+            <!--</li>-->
         </ul>
     </div>
 
 </main>
 <!-- /.container -->
-
+<script type="text/javascript" th:src="@{/js/MemeItem.js}"></script>
+<script type="text/javascript" th:src="@{/js/infinite-scroll.js}"></script>
+<script th:inline="javascript">
+    const memes = /*[[${memesPage.content}]]*/ null;
+    appendItems(memes);
+</script>
 <script type="text/javascript" th:src="@{/js/changeLang.js}"></script>
 <script type="text/javascript" th:src="@{webjars/bootstrap/4.4.1/js/bootstrap.min.js}"></script>
 
