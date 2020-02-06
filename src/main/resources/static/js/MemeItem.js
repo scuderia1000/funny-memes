@@ -2,57 +2,12 @@
 
 const template = document.createElement('template');
 template.innerHTML = `
-    <style>
-        .meme-post-item {
-            display: flex;
-            flex-direction: column;
-            /*align-items: center;*/
-            /*justify-content: center;*/
-            padding: 5px 5px 10px 20px;
-            background-color: white;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .meme-title {
-            font-weight: 500;
-            font-size: 18px;
-        }
-        .score-container {
-            display: flex;
-            /*justify-content: center;*/
-            align-items: center;
-            padding: 5px;
-        }
-        .score-text,
-        .score-date {
-            font-size: 14px;
-            font-weight: 500;
-            margin-right: 5px;
-        }
-        .score-like-icon {
-            width: 18px;
-        }
-        .post-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            max-height: 512px;
-        }
-        .meme-media-content {
-            max-height: 478px;
-        }
-
-        .media-image {
-            max-height: 400px;
-        }
-    </style>
+    <link rel="stylesheet" href="../../static/css/meme-item.css"/>
     <li class="meme-post-item">
         <span class="meme-title"></span>
         <div class="score-container">
             <span class="score-text"></span>
-            <img class="score-like-icon" src="../static/images/svg/like.svg" alt="like"/>
+            <img class="score-like-icon" src="../../static/images/svg/like.svg" alt="like"/>
         </div>
         <span class="score-date"></span>
         <div class="post-message">
@@ -75,19 +30,10 @@ class MemeItem extends HTMLElement {
 
     connectedCallback() {
         debugger
-
-        // If your code is inside of an HTML Import you'll need to change the above line to:
-        // let tmpl = document.currentScript.ownerDocument.querySelector('#x-foo-from-template');
-        // const node = template.content.cloneNode(true);
-        // const node = document.importNode(template.content, true);
-        // this.appendChild(node);
-        this.render();
-
-
-
-        // this.querySelector('button').addEventListener('click', this.close);
-        // this.querySelector('.overlay').addEventListener('click', this.close);
-        // this.open = this.open;
+        if (!this.rendered) {
+            this.render();
+            this.rendered = true;
+        }
     }
 
     disconnectedCallback() {
@@ -96,23 +42,92 @@ class MemeItem extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['title', 'score', 'publishDate', 'memeId', 'fullMediaUrl'];
+        return ['title', 'score', 'publishdate', 'memeid', 'fullmediaurl'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         this.render();
     }
 
+    get title() {
+        return this.hasAttribute('title');
+    }
+
+    set title(val) {
+        if (val) {
+            this.setAttribute('title', val);
+        } else {
+            this.removeAttribute('title');
+        }
+    }
+
+    get score() {
+        return this.hasAttribute('score');
+    }
+
+    set score(val) {
+        if (val) {
+            this.setAttribute('score', val);
+        } else {
+            this.removeAttribute('score');
+        }
+    }
+
+    get publishdate() {
+        return this.hasAttribute('publishdate');
+    }
+
+    set publishdate(val) {
+        if (val) {
+            this.setAttribute('publishdate', val);
+        } else {
+            this.removeAttribute('publishdate');
+        }
+    }
+
+    get memeid() {
+        return this.hasAttribute('memeid');
+    }
+
+    set memeid(val) {
+        if (val) {
+            this.setAttribute('memeid', val);
+        } else {
+            this.removeAttribute('memeid');
+        }
+    }
+
+    get fullmediaurl() {
+        return this.hasAttribute('fullmediaurl');
+    }
+
+    set fullmediaurl(val) {
+        if (val) {
+            this.setAttribute('fullmediaurl', val);
+        } else {
+            this.removeAttribute('fullmediaurl');
+        }
+    }
+
     render() {
-        debugger
-        this.querySelector('.meme-title').innerHTML = this.getAttribute('title');
-        this.querySelector('.score-text').innerHTML = this.getAttribute('score');
+        const shadowRoot = this.shadowRoot,
+            memeId = this.getAttribute('memeid'),
+            dateAttr = this.getAttribute('publishdate'),
+            fullMediaUrl = this.getAttribute('fullmediaurl');
 
-        const publishDate = new Date(this.getAttribute('publishDate'));
-        this.querySelector('.score-date').innerHTML = publishDate.toLocaleString();
+        shadowRoot.querySelector('.meme-title').innerHTML = this.getAttribute('title') || '';
+        shadowRoot.querySelector('.score-text').innerHTML = this.getAttribute('score') || '';
 
-        this.querySelector('meme-content-link').href = '/post/' + this.getAttribute('memeId');
-        this.querySelector('.media-image').src = this.getAttribute('fullMediaUrl');
+        const publishDate = dateAttr && new Date(dateAttr) || '';
+        shadowRoot.querySelector('.score-date').innerHTML = publishDate.toLocaleString();
+
+        if (memeId) {
+            shadowRoot.querySelector('#meme-content-link').href = '/post/' + memeId;
+        }
+        if (fullMediaUrl) {
+            shadowRoot.querySelector('.media-image').src = fullMediaUrl;
+        }
+        this.rendered = true;
     }
 }
 

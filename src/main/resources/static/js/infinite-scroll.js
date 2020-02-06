@@ -17,9 +17,9 @@ const appendItems = function(items) {
         const itemEl = document.createElement('meme-item');
         itemEl.title = item.title;
         itemEl.score = item.score;
-        itemEl.publishDate = item.publishDate;
-        itemEl.memeId = item.id;
-        itemEl.fullMediaUrl = item.fullMediaUrl;
+        itemEl.publishdate = item.publishDate;
+        itemEl.memeid = item.id;
+        itemEl.fullmediaurl = item.fullMediaUrl;
 
         listElm.appendChild(itemEl);
     });

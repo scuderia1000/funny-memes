@@ -1,0 +1,44 @@
+.meme-post-item {
+    display: flex;
+    flex-direction: column;
+    /*align-items: center;*/
+    /*justify-content: center;*/
+    padding: 5px 5px 10px 20px;
+    background-color: white;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.meme-title {
+    font-weight: 500;
+    font-size: 18px;
+}
+.score-container {
+    display: flex;
+    /*justify-content: center;*/
+    align-items: center;
+    padding: 5px;
+}
+.score-text,
+.score-date {
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 5px;
+}
+.score-like-icon {
+    width: 18px;
+}
+.post-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-height: 512px;
+}
+.meme-media-content {
+    max-height: 478px;
+}
+
+.media-image {
+    max-height: 400px;
+}
