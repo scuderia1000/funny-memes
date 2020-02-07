@@ -2,12 +2,12 @@
 
 const template = document.createElement('template');
 template.innerHTML = `
-    <link rel="stylesheet" href="../../static/css/meme-item.css"/>
+    <link rel="stylesheet" href="/css/meme-item.css"/>
     <li class="meme-post-item">
         <span class="meme-title"></span>
         <div class="score-container">
             <span class="score-text"></span>
-            <img class="score-like-icon" src="../../static/images/svg/like.svg" alt="like"/>
+            <img class="score-like-icon" src="/images/svg/like.svg" alt="like"/>
         </div>
         <span class="score-date"></span>
         <div class="post-message">
@@ -29,11 +29,6 @@ class MemeItem extends HTMLElement {
     }
 
     connectedCallback() {
-        debugger
-        if (!this.rendered) {
-            this.render();
-            this.rendered = true;
-        }
     }
 
     disconnectedCallback() {
@@ -50,63 +45,43 @@ class MemeItem extends HTMLElement {
     }
 
     get title() {
-        return this.hasAttribute('title');
+        return this.getAttribute('title');
     }
 
     set title(val) {
-        if (val) {
-            this.setAttribute('title', val);
-        } else {
-            this.removeAttribute('title');
-        }
+        this.setAttribute('title', val);
     }
 
     get score() {
-        return this.hasAttribute('score');
+        return this.getAttribute('score');
     }
 
     set score(val) {
-        if (val) {
-            this.setAttribute('score', val);
-        } else {
-            this.removeAttribute('score');
-        }
+        this.setAttribute('score', val);
     }
 
     get publishdate() {
-        return this.hasAttribute('publishdate');
+        return this.getAttribute('publishdate');
     }
 
     set publishdate(val) {
-        if (val) {
-            this.setAttribute('publishdate', val);
-        } else {
-            this.removeAttribute('publishdate');
-        }
+        this.setAttribute('publishdate', val);
     }
 
     get memeid() {
-        return this.hasAttribute('memeid');
+        return this.getAttribute('memeid');
     }
 
     set memeid(val) {
-        if (val) {
-            this.setAttribute('memeid', val);
-        } else {
-            this.removeAttribute('memeid');
-        }
+        this.setAttribute('memeid', val);
     }
 
     get fullmediaurl() {
-        return this.hasAttribute('fullmediaurl');
+        return this.getAttribute('fullmediaurl');
     }
 
     set fullmediaurl(val) {
-        if (val) {
-            this.setAttribute('fullmediaurl', val);
-        } else {
-            this.removeAttribute('fullmediaurl');
-        }
+        this.setAttribute('fullmediaurl', val);
     }
 
     render() {
@@ -127,7 +102,6 @@ class MemeItem extends HTMLElement {
         if (fullMediaUrl) {
             shadowRoot.querySelector('.media-image').src = fullMediaUrl;
         }
-        this.rendered = true;
     }
 }
 

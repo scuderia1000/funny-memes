@@ -14,14 +14,15 @@ const loadMore = function() {
 
 const appendItems = function(items) {
     items.forEach((item) => {
-        const itemEl = document.createElement('meme-item');
-        itemEl.title = item.title;
-        itemEl.score = item.score;
-        itemEl.publishdate = item.publishDate;
-        itemEl.memeid = item.id;
-        itemEl.fullmediaurl = item.fullMediaUrl;
+        const memeItem = document.createElement('meme-item');
 
-        listElm.appendChild(itemEl);
+        memeItem.title = item.title;
+        memeItem.score = item.score;
+        memeItem.publishdate = item.publishDate;
+        memeItem.memeid = item.id;
+        memeItem.fullmediaurl = item.fullMediaUrl;
+
+        listElm.appendChild(memeItem);
     });
 };
 
