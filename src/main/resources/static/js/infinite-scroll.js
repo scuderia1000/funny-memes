@@ -1,15 +1,18 @@
 const listElm = document.querySelector('#infinite-list');
+const contentElm = document.querySelector('.meme-content');
 
 let nextItem = 1;
 const loadMore = function() {
-    for (var i = 0; i < 20; i++) {
-        var item = document.createElement('li');
-        item.innerText = 'Item ' + nextItem++;
-
-
-
-        listElm.appendChild(item);
-    }
+    debugger
+    window.location.replace('?page=' + 2);
+    // for (var i = 0; i < 20; i++) {
+    //     var item = document.createElement('li');
+    //     item.innerText = 'Item ' + nextItem++;
+    //
+    //
+    //
+    //     listElm.appendChild(item);
+    // }
 };
 
 const appendItems = function(items) {
@@ -29,6 +32,12 @@ const appendItems = function(items) {
 // Detect when scrolled to bottom.
 listElm.addEventListener('scroll', function() {
     if (listElm.scrollTop + listElm.clientHeight >= listElm.scrollHeight) {
+        loadMore();
+    }
+});
+
+contentElm.addEventListener('scroll', function() {
+    if (contentElm.scrollTop + contentElm.clientHeight >= contentElm.scrollHeight) {
         loadMore();
     }
 });

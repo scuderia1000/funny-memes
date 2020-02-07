@@ -9,6 +9,11 @@
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
 </head>
 <body>
+<!--<header>header</header>-->
+<!--<section class="main-content">-->
+    <!--<ul id="infinite-list"></ul>-->
+<!--</section>-->
+<!--<footer>footer</footer>-->
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <a class="navbar-brand" href="https://github.com/scuderia1000/funny-memes">Project repo</a>
     <span class="change-lang" th:text="#{language.change}"></span>:
@@ -21,32 +26,19 @@
 
 <main role="main" class="container">
 
-    <div class="starter-template">
+    <header class="meme-header">
         <h1 th:text="#{welcome.message}"></h1>
-        <h2>
-            <!--<span th:text="'Hello, ' + ${message}"></span>-->
-        </h2>
+    </header>
+
+    <div class="meme-content">
+        <ul id="infinite-list"></ul>
     </div>
 
-    <div class="meme-container">
-        <ul id="infinite-list">
-            <!--<li class="meme-post-item" th:each="meme : ${memesPage.content}">-->
-                <!--<span th:text="${meme.title}" class="meme-title"></span>-->
-                <!--<div class="score-container">-->
-                    <!--<span class="score-text" th:text="${meme.score}"></span>-->
-                    <!--<img class="score-like-icon" th:src="@{/images/svg/like.svg}"/>-->
-                <!--</div>-->
-                <!--<span class="score-date" th:text="${#dates.format(meme.publishDate, 'dd.MM.yyyy HH:mm')}"></span>-->
-                <!--<div class="post-message">-->
-                    <!--<a th:href="@{/image/{id}(id=${meme.id})}">-->
-                        <!--<div class="meme-media-content">-->
-                            <!--<img th:src="${meme.fullMediaUrl}" th:alt="${meme.title}" class="media-image">-->
-                        <!--</div>-->
-                    <!--</a>-->
-                <!--</div>-->
-            <!--</li>-->
-        </ul>
-    </div>
+    <footer class="meme-footer">
+        <h2>
+            Footer
+        </h2>
+    </footer>
 
 </main>
 <!-- /.container -->

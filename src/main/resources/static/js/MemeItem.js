@@ -24,7 +24,6 @@ class MemeItem extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        // const template = document.getElementById('meme-item-template');
         this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
 

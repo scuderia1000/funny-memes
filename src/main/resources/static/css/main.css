@@ -1,9 +1,11 @@
-body {
-    padding-top: 5rem;
+html,
+body,
+.container {
+    height: 100%;
 }
-.starter-template {
-    padding: 3rem 1.5rem;
-    text-align: center;
+
+body {
+    overflow: hidden;
 }
 
 h1{
@@ -14,63 +16,43 @@ h2{
     color:#FF0000;
 }
 
+header,
+footer {
+    flex: 0 0 auto;
+}
+.main-content{
+    flex: 1 0 auto;
+}
+
 .change-lang {
     color: white;
 }
 
-.meme-container {
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.meme-header,
+.meme-footer {
+    padding: 1rem 1.5rem;
+    text-align: center;
+}
+
+.meme-header {
+    padding-top: 5rem;
+}
+
+.meme-content {
+    flex: 1 1 auto;
+    position: relative;
+    overflow-y: auto;
     background-color: #e5e5e5;
-    max-width: 100%;
     padding: 20px;
 }
 
-/*.meme-post-item {*/
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*!*align-items: center;*!*/
-    /*!*justify-content: center;*!*/
-    /*padding: 5px 5px 10px 20px;*/
-    /*background-color: white;*/
-    /*margin-bottom: 20px;*/
-    /*border: 1px solid #ccc;*/
-    /*border-radius: 4px;*/
-/*}*/
+#infinite-list {
+}
 
-/*.post-message {*/
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*align-items: center;*/
-    /*justify-content: center;*/
-    /*max-height: 512px;*/
-/*}*/
 
-/*.meme-media-content {*/
-    /*max-height: 478px;*/
-/*}*/
 
-/*.media-image {*/
-    /*max-height: 400px;*/
-/*}*/
-
-/*.meme-title {*/
-    /*font-weight: 500;*/
-    /*font-size: 18px;*/
-/*}*/
-
-/*.score-container {*/
-    /*display: flex;*/
-    /*!*justify-content: center;*!*/
-    /*align-items: center;*/
-    /*padding: 5px;*/
-/*}*/
-
-/*.score-text,*/
-/*.score-date {*/
-    /*font-size: 14px;*/
-    /*font-weight: 500;*/
-    /*margin-right: 5px;*/
-/*}*/
-
-/*.score-like-icon {*/
-    /*width: 18px;*/
-/*}*/
