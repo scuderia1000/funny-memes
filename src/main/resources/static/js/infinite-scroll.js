@@ -1,21 +1,27 @@
-const listElm = document.querySelector('#infinite-list');
-const contentElm = document.querySelector('.meme-content');
+const loadMore = async function() {
 
-let nextItem = 1;
-const loadMore = function() {
-    debugger
-    window.location.replace('?page=' + 2);
-    // for (var i = 0; i < 20; i++) {
-    //     var item = document.createElement('li');
-    //     item.innerText = 'Item ' + nextItem++;
-    //
-    //
-    //
-    //     listElm.appendChild(item);
-    // }
+    const pagePrefix = '/page',
+        firstPageNum = 1,
+        pathname = window.location.pathname,
+        uri = window.location.protocol + '//' + window.location.host;
+    let pageNum = pathname && pathname !== '/' && pathname.replace(pagePrefix, '') || firstPageNum,
+        url = uri + pagePrefix + (++pageNum);
+
+    let response = await fetch(url);
+
+    if (response.ok) {
+        let json = await response.json();
+        let respPageNum = json.number + 1;
+        window.history.pushState(respPageNum, respPageNum, pagePrefix + respPageNum);
+
+        return json;
+    } else {
+        throw new Error("Ошибка HTTP: " + response.status);
+    }
 };
 
 const appendItems = function(items) {
+    const listElm = document.querySelector('#infinite-list');
     items.forEach((item) => {
         const memeItem = document.createElement('meme-item');
 
@@ -29,15 +35,17 @@ const appendItems = function(items) {
     });
 };
 
-// Detect when scrolled to bottom.
-listElm.addEventListener('scroll', function() {
-    if (listElm.scrollTop + listElm.clientHeight >= listElm.scrollHeight) {
-        loadMore();
-    }
-});
-
-contentElm.addEventListener('scroll', function() {
-    if (contentElm.scrollTop + contentElm.clientHeight >= contentElm.scrollHeight) {
-        loadMore();
+document.addEventListener('scroll', function() {
+    if (document.documentElement.scrollTop + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+        const loadMorePromise = loadMore();
+        loadMorePromise
+            .then(result => {
+                if (result) {
+                    appendItems(result.content)
+                }
+            })
+            .catch(err => {
+                console.log(err)
+            });
     }
 });

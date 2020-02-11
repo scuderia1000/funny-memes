@@ -37,56 +37,43 @@ public class MemeController {
         this.memeService = memeService;
     }
 
-//    @RequestMapping(value = "/", method = RequestMethod.GET)
-//    public ResponseEntity<Page<MemeList>> getMemesPaged(
-//                                        @RequestParam("page") Optional<Integer> page,
-//                                        @RequestParam("size") Optional<Integer> size) {
-//        LOG.info("Get memes paged request");
-//
-//        Locale locale = LocaleContextHolder.getLocale();
-//
-//        int currentPage = page.orElse(1);
-//        int pageSize = size.orElse(5);
-//
-//        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
-//
-////        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
-////        model.addAttribute("memesPage", memesPage);
-////        model.addAttribute("memes", memes);
-//
-////        int totalPages = memesPage.getTotalPages();
-////        if (totalPages > 0) {
-////            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-////                    .boxed()
-////                    .collect(Collectors.toList());
-////            model.addAttribute("pageNumbers", pageNumbers);
-////        }
-//
-//        return ResponseEntity.ok(memesPage);
-//    }
-
-//    @RequestMapping(value = "/", method = RequestMethod.GET)
-//    public String getMemes(Model model) {
-//        LOG.info("Get memes request");
-//
-//        Locale locale = LocaleContextHolder.getLocale();
-//
-//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
-//        model.addAttribute("memes", memes);
-//
-//        return "index";
-//    }
-
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String getMemesPaged(Model model,
-                                @RequestParam("page") Optional<Integer> page,
-                                @RequestParam("size") Optional<Integer> size) {
+    @RequestMapping(value = "/page{number:\\d+}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<Page<MemeList>> getMemesPaged(
+                                        @PathVariable("number") Optional<String> page,
+                                        @RequestParam("size") Optional<Integer> size) {
         LOG.info("Get memes paged request");
 
         Locale locale = LocaleContextHolder.getLocale();
 
-        int currentPage = page.orElse(1);
+        int currentPage = Integer.parseInt(page.orElse("1"));
         int pageSize = size.orElse(5);
+
+        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
+
+//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
+//        model.addAttribute("memesPage", memesPage);
+//        model.addAttribute("memes", memes);
+
+//        int totalPages = memesPage.getTotalPages();
+//        if (totalPages > 0) {
+//            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+//                    .boxed()
+//                    .collect(Collectors.toList());
+//            model.addAttribute("pageNumbers", pageNumbers);
+//        }
+
+        return ResponseEntity.ok(memesPage);
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String getMemesPaged(Model model) {
+        LOG.info("Get memes paged request");
+
+        Locale locale = LocaleContextHolder.getLocale();
+
+        int currentPage = 1;
+        int pageSize = 5;
 
         Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
 
@@ -110,4 +97,16 @@ public class MemeController {
         LOG.info("Get meme by id request: {}", id);
         return memeService.findById(id);
     }
+
+    //    @RequestMapping(value = "/", method = RequestMethod.GET)
+//    public String getMemes(Model model) {
+//        LOG.info("Get memes request");
+//
+//        Locale locale = LocaleContextHolder.getLocale();
+//
+//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
+//        model.addAttribute("memes", memes);
+//
+//        return "index";
+//    }
 }

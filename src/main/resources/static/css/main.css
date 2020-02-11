@@ -1,11 +1,12 @@
 html,
-body,
-.container {
+body {
     height: 100%;
+    width: 100%;
 }
 
 body {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 h1{
@@ -18,8 +19,17 @@ h2{
 
 header,
 footer {
-    flex: 0 0 auto;
+    /*flex: 0 0 auto;*/
 }
+
+.container {
+    /*height: 100%;*/
+    position: relative;
+    box-sizing: border-box;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+}
+
 .main-content{
     flex: 1 0 auto;
 }
@@ -28,10 +38,7 @@ footer {
     color: white;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-}
+
 
 .meme-header,
 .meme-footer {
@@ -44,9 +51,9 @@ footer {
 }
 
 .meme-content {
-    flex: 1 1 auto;
-    position: relative;
-    overflow-y: auto;
+    /*flex: 1 1 auto;*/
+    /*position: relative;*/
+    /*overflow-y: auto;*/
     background-color: #e5e5e5;
     padding: 20px;
 }
