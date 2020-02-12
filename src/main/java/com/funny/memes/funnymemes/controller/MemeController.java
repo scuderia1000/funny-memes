@@ -7,7 +7,6 @@ import com.funny.memes.funnymemes.service.MemeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,6 +26,8 @@ import java.util.stream.IntStream;
 public class MemeController {
 
     private final static Logger LOG = LoggerFactory.getLogger(MemeController.class);
+
+    private static final int DEFAULT_PAGE_SIZE = 5;
 
     private final MemeService memeService;
 
@@ -41,45 +43,27 @@ public class MemeController {
     @ResponseBody
     public ResponseEntity<Page<MemeList>> getMemesPaged(
                                         @PathVariable("number") Optional<String> page,
-                                        @RequestParam("size") Optional<Integer> size) {
+                                        @RequestParam("size") OptionalInt size,
+                                        Locale locale) {
         LOG.info("Get memes paged request");
 
-        Locale locale = LocaleContextHolder.getLocale();
-
         int currentPage = Integer.parseInt(page.orElse("1"));
-        int pageSize = size.orElse(5);
+        int pageSize = size.orElse(DEFAULT_PAGE_SIZE);
 
         Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
-
-//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
-//        model.addAttribute("memesPage", memesPage);
-//        model.addAttribute("memes", memes);
-
-//        int totalPages = memesPage.getTotalPages();
-//        if (totalPages > 0) {
-//            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-//                    .boxed()
-//                    .collect(Collectors.toList());
-//            model.addAttribute("pageNumbers", pageNumbers);
-//        }
 
         return ResponseEntity.ok(memesPage);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String getMemesPaged(Model model) {
+    public String getMemesPaged(Model model, Locale locale) {
         LOG.info("Get memes paged request");
 
-        Locale locale = LocaleContextHolder.getLocale();
-
         int currentPage = 1;
-        int pageSize = 5;
 
-        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
+        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, DEFAULT_PAGE_SIZE));
 
-//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
         model.addAttribute("memesPage", memesPage);
-//        model.addAttribute("memes", memes);
 
         int totalPages = memesPage.getTotalPages();
         if (totalPages > 0) {
