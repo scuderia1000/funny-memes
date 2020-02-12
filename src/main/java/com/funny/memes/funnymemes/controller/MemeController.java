@@ -77,9 +77,14 @@ public class MemeController {
     }
 
     @RequestMapping(value = "/post/{id}", method = RequestMethod.GET)
-    public Meme getMeme(@PathVariable String id) {
+    public String getMeme(@PathVariable String id, Model model) {
         LOG.info("Get meme by id request: {}", id);
-        return memeService.findById(id);
+
+        Meme meme = memeService.findById(id);
+
+        model.addAttribute("meme", meme);
+
+        return "meme";
     }
 
     //    @RequestMapping(value = "/", method = RequestMethod.GET)
