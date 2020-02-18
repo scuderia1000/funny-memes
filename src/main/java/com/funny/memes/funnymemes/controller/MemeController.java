@@ -43,14 +43,12 @@ public class MemeController {
     @ResponseBody
     public ResponseEntity<Page<MemeList>> getMemesPaged(
                                         @PathVariable("number") Optional<String> page,
-                                        @RequestParam("size") OptionalInt size,
                                         Locale locale) {
         LOG.info("Get memes paged request");
 
         int currentPage = Integer.parseInt(page.orElse("1"));
-        int pageSize = size.orElse(DEFAULT_PAGE_SIZE);
 
-        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, pageSize));
+        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, DEFAULT_PAGE_SIZE));
 
         return ResponseEntity.ok(memesPage);
     }
