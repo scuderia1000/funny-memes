@@ -12,7 +12,7 @@ const loadMore = async function() {
     if (response.ok) {
         let json = await response.json();
         let respPageNum = json.number + 1;
-        window.history.pushState(respPageNum, respPageNum, pagePrefix + respPageNum);
+        window.history.pushState(respPageNum, null, pagePrefix + respPageNum);
 
         return json;
     } else {

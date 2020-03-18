@@ -22,7 +22,7 @@ $ docker build --rm -t funny/memes .
 
 $ docker run -p 8080:8080 --env-file ./env_file_name.env funny/memes
 ```
-Add bucket policy:
+Add bucket policy to AWS S3:
 ```json
 {
     "Version": "2012-10-17",
