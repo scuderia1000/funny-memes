@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,7 +38,7 @@ public class MemeController {
         this.memeService = memeService;
     }
 
-    @RequestMapping(value = "/page{number:\\d+}", method = RequestMethod.GET)
+    @RequestMapping(value = "/page{number:\\d+}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Page<MemeList>> getMemesPaged(
                                         @PathVariable("number") Optional<String> page,
@@ -59,17 +58,20 @@ public class MemeController {
 
         int currentPage = 1;
 
-        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, DEFAULT_PAGE_SIZE));
+        addMemesToModel(model, currentPage, locale);
 
-        model.addAttribute("memesPage", memesPage);
+        return "index";
+    }
 
-        int totalPages = memesPage.getTotalPages();
-        if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
-            model.addAttribute("pageNumbers", pageNumbers);
-        }
+    @RequestMapping(value = "/page{number:\\d+}", method = RequestMethod.GET)
+    public String getMemesByPage(@PathVariable("number") Optional<String> page,
+                                 Model model,
+                                 Locale locale) {
+        LOG.info("Get memes page {}", page);
+
+        int currentPage = Integer.parseInt(page.orElse("1"));
+
+        addMemesToModel(model, currentPage, locale);
 
         return "index";
     }
@@ -85,15 +87,17 @@ public class MemeController {
         return "meme";
     }
 
-    //    @RequestMapping(value = "/", method = RequestMethod.GET)
-//    public String getMemes(Model model) {
-//        LOG.info("Get memes request");
-//
-//        Locale locale = LocaleContextHolder.getLocale();
-//
-//        List<MemeList> memes = memeListService.findAllByLang(locale.toString());
-//        model.addAttribute("memes", memes);
-//
-//        return "index";
-//    }
+    private void addMemesToModel(Model model, int currentPage, Locale locale) {
+        Page<MemeList> memesPage = memeListService.findAllByLang(locale.toString(), PageRequest.of(currentPage - 1, DEFAULT_PAGE_SIZE));
+
+        model.addAttribute("memesPage", memesPage);
+
+        int totalPages = memesPage.getTotalPages();
+        if (totalPages > 0) {
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+                    .boxed()
+                    .collect(Collectors.toList());
+            model.addAttribute("pageNumbers", pageNumbers);
+        }
+    }
 }

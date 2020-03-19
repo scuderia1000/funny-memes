@@ -7,12 +7,17 @@ const loadMore = async function() {
     let pageNum = pathname && pathname !== '/' && pathname.replace(pagePrefix, '') || firstPageNum,
         url = uri + pagePrefix + (++pageNum);
 
-    let response = await fetch(url);
+    let response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 
     if (response.ok) {
         let json = await response.json();
         let respPageNum = json.number + 1;
-        window.history.pushState(respPageNum, null, pagePrefix + respPageNum);
+        window.history.pushState({}, null, pagePrefix + respPageNum);
 
         return json;
     } else {
