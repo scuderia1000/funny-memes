@@ -1,3 +1,14 @@
+let observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.src = entry.target.dataset.src;
+                observer.unobserve(entry.target);
+            }
+        });
+    },
+    // {rootMargin: "0px 0px -500px 0px"}
+);
+
 const loadMore = async function() {
 
     const pagePrefix = '/page',
@@ -21,7 +32,7 @@ const loadMore = async function() {
 
         return json;
     } else {
-        throw new Error("Ошибка HTTP: " + response.status);
+        throw new Error('Ошибка HTTP: ' + response.status);
     }
 };
 
@@ -36,6 +47,9 @@ const appendItems = function(items) {
         memeItem.memeid = item.id;
         memeItem.fullmediaurl = item.fullMediaUrl;
 
+        memeItem.shadowRoot.querySelectorAll('img').forEach(img => {
+            observer.observe(img);
+        });
         listElm.appendChild(memeItem);
     });
 };
@@ -46,11 +60,11 @@ document.addEventListener('scroll', function() {
         loadMorePromise
             .then(result => {
                 if (result) {
-                    appendItems(result.content)
+                    appendItems(result.content);
                 }
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
             });
     }
 });

@@ -9,37 +9,53 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
 .meme-title {
     font-weight: 500;
     font-size: 18px;
 }
+
 .score-container {
     display: flex;
-    /*justify-content: center;*/
     align-items: center;
     padding: 5px;
 }
+
 .score-text,
 .score-date {
     font-size: 14px;
     font-weight: 500;
     margin-right: 5px;
 }
+.like-icon-container {
+    width: 18px;
+    height: 18px;
+}
 .score-like-icon {
     width: 18px;
 }
+
 .post-message {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-height: 512px;
     overflow: hidden;
 }
+
 .meme-media-content {
-    max-height: 478px;
+    width: 580px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: rgb(144, 124, 123);
 }
 
 .media-image {
-    max-height: 400px;
+    background: #F1F1FA;
+    width: 100%;
+    max-width: 100%;
+    opacity: 1;
+    transition: opacity .3s ease-in-out;
 }

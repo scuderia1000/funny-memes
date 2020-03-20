@@ -38,8 +38,6 @@ footer {
     color: white;
 }
 
-
-
 .meme-header,
 .meme-footer {
     padding: 1rem 1.5rem;
@@ -51,14 +49,8 @@ footer {
 }
 
 .meme-content {
-    /*flex: 1 1 auto;*/
-    /*position: relative;*/
-    /*overflow-y: auto;*/
     background-color: #e5e5e5;
     padding: 20px;
-}
-
-#infinite-list {
 }
 
 

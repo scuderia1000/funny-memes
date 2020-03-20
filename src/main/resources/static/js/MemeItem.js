@@ -7,13 +7,15 @@ template.innerHTML = `
         <span class="meme-title"></span>
         <div class="score-container">
             <span class="score-text"></span>
-            <img class="score-like-icon" src="/images/svg/like.svg" alt="like"/>
+            <div class="like-icon-container">
+                <img class="score-like-icon" src="/images/gif/1px.gif" data-src="/images/svg/like.svg" alt="like"/>
+            </div>
         </div>
         <span class="score-date"></span>
         <div class="post-message">
             <a href="#" id="meme-content-link">
                 <div class="meme-media-content">
-                    <img class="media-image">
+                    <img class="media-image" src="/images/gif/1px.gif" data-src="">
                 </div>
             </a>
         </div>
@@ -99,7 +101,8 @@ class MemeItem extends HTMLElement {
             shadowRoot.querySelector('#meme-content-link').href = '/post/' + memeId;
         }
         if (fullMediaUrl) {
-            shadowRoot.querySelector('.media-image').src = fullMediaUrl;
+            // shadowRoot.querySelector('.media-image').src = fullMediaUrl;
+            shadowRoot.querySelector('.media-image').dataset.src = fullMediaUrl;
         }
     }
 }
