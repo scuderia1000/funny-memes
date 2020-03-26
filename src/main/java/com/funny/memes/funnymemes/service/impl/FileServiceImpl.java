@@ -1,7 +1,9 @@
 package com.funny.memes.funnymemes.service.impl;
 
+import com.funny.memes.funnymemes.dto.PutObjectResponseDto;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.service.FileService;
+import com.funny.memes.funnymemes.service.MemeListService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +23,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static com.funny.memes.funnymemes.config.Const.ERROR;
-import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
+import static com.funny.memes.funnymemes.config.Const.*;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -37,13 +35,16 @@ public class FileServiceImpl implements FileService {
 
     private final static Logger LOG = LoggerFactory.getLogger(FileServiceImpl.class);
 
-    private static List<String> filesMd5Sums = new ArrayList<>();
+    private static Set<String> filesMd5Sums = new HashSet<>();
 
     @Autowired
     private S3AsyncClient s3AsyncClient;
 
     @Autowired
     private S3Client s3Client;
+
+    @Autowired
+    private MemeListService memeListService;
 
     @Value("${app.awsServices.bucketName}")
     private String awsS3BucketName;
@@ -81,7 +82,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public CompletableFuture<String> uploadMediaToS3(String fileName, String lang) {
+    public CompletableFuture<PutObjectResponseDto> uploadMediaToS3(String fileName, String lang) {
         String localMd5Sum = "";
         try {
             localMd5Sum = BinaryUtils.toHex(Md5Utils.computeMD5Hash(Paths.get(fileName).toFile()));
@@ -92,7 +93,7 @@ public class FileServiceImpl implements FileService {
         if (filesMd5Sums.contains(localMd5Sum)) {
             LOG.error("File Service ({}): File {} exist in s3", Thread.currentThread().getName(), fileName);
 
-            return CompletableFuture.completedFuture(FILE_EXIST_IN_REMOTE_STORAGE);
+            return CompletableFuture.completedFuture(new PutObjectResponseDto(FILE_EXIST_IN_REMOTE_STORAGE));
         }
 
         LOG.debug("File Service ({}): Start upload file {} to s3", Thread.currentThread().getName(), fileName);
@@ -114,15 +115,18 @@ public class FileServiceImpl implements FileService {
             return resp;
         });
 
-        CompletableFuture<String> result = future.thenApply(resp -> {
-            String url = "";
+        CompletableFuture<PutObjectResponseDto> result = future.thenApply(resp -> {
+            PutObjectResponseDto responseDto = new PutObjectResponseDto(ERROR);
             if (resp != null) {
-                url = s3AsyncClient.utilities()
+                String url = s3AsyncClient.utilities()
                         .getUrl(GetUrlRequest.builder().bucket(awsS3BucketName).key(key).build()).toString();
+
+                responseDto = new PutObjectResponseDto(OK, resp.eTag(), url);
+
                 LOG.info("File Service ({}): Complete upload file {} to s3, file url: {}", Thread.currentThread().getName(), key, url);
             }
 
-            return url;
+            return responseDto;
         });
         future.join();
 
@@ -172,6 +176,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public String updateMd5SumList() {
+        List<String> md5Sums = memeListService.getAllMd5Sum();
+        filesMd5Sums.addAll(md5Sums);
+
+        return OK;
+    }
+
+    @Override
     public List<String> getAllBucketObjects() {
         List<String> result = new ArrayList<>();
         try {
@@ -215,7 +227,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<String> getFilesMd5Sums() {
+    public Set<String> getFilesMd5Sums() {
         return filesMd5Sums;
     }
 }

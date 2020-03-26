@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.funny.memes.funnymemes.config.RedditGroupsProperties;
+import com.funny.memes.funnymemes.dto.PutObjectResponseDto;
 import com.funny.memes.funnymemes.entity.Meme;
 import com.funny.memes.funnymemes.entity.RedditMemeDeserializer;
 import com.funny.memes.funnymemes.service.FileService;
@@ -31,6 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.*;
 
 import static com.funny.memes.funnymemes.config.Const.FILE_EXIST_IN_REMOTE_STORAGE;
+import static com.funny.memes.funnymemes.config.Const.OK;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -129,15 +131,12 @@ public class ParseProcessorImpl implements ParseProcessor {
         return CompletableFuture.supplyAsync(() -> getRedditGroupsContent(groupUrl));
     }
 
-    private String getS3MediaUrl(Meme meme, String lang) {
-        String result = null;
+    private PutObjectResponseDto uploadMedia(Meme meme, String lang) {
+        PutObjectResponseDto result = null;
         String fileName = fileService.downloadImage(meme.getSourceMediaUrl());
         if (!StringUtils.isEmpty(fileName)) {
             try {
-                String s3url = fileService.uploadMediaToS3(fileName, lang).get();
-                if (!StringUtils.isEmpty(s3url) && !s3url.equals(FILE_EXIST_IN_REMOTE_STORAGE)) {
-                    result = s3url;
-                }
+                result = fileService.uploadMediaToS3(fileName, lang).get();
 
                 try {
                     Files.deleteIfExists(Paths.get(fileName));
@@ -155,10 +154,13 @@ public class ParseProcessorImpl implements ParseProcessor {
     private CompletableFuture<List<Meme>> uploadGroupContents(List<Meme> memes, String lang) {
         return CompletableFuture.supplyAsync(() -> memes.parallelStream()
                 .map(meme -> {
-                    String s3Url = getS3MediaUrl(meme, lang);
-                    if (!StringUtils.isEmpty(s3Url)) {
-                        meme.setFullMediaUrl(s3Url);
+                    PutObjectResponseDto responseDto = uploadMedia(meme, lang);
+
+                    if (responseDto != null && responseDto.getResponseText().equals(OK)) {
+                        meme.setFullMediaUrl(responseDto.getS3Url());
                         meme.setLang(lang);
+                        meme.setMd5Sum(responseDto.getMd5Sum());
+
                         LOG.debug("Meme s3 url is: {}", meme.getFullMediaUrl());
                     }
                     return meme;

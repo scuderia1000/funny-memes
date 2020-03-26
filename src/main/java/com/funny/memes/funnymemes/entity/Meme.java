@@ -21,6 +21,7 @@ public class Meme {
     private Integer score;
     private String title;
     private String lang;
+    private String md5Sum;
 
     public String getId() {
         return id;
@@ -100,5 +101,13 @@ public class Meme {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getMd5Sum() {
+        return md5Sum;
+    }
+
+    public void setMd5Sum(String md5Sum) {
+        this.md5Sum = md5Sum;
     }
 }

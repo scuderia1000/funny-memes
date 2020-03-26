@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.funny.memes.funnymemes.config.Const.ERROR;
+import static com.funny.memes.funnymemes.config.Const.OK;
 
 /**
  * Author: Valentin Ershov
@@ -25,14 +26,8 @@ public class MemeParseServiceImpl implements MemeParseService {
 
     private final static Logger LOG = LoggerFactory.getLogger(MemeParseServiceImpl.class);
 
-//    @Value("#{'${reddit.group}'.split(',')}")
-//    private List<String> propertyRedditGroups;
-
     @Value("${parse-meme-thread.wait.time}")
     private Long propertyThreadWaitTime;
-
-//    @Value("${reddit.postfix}")
-//    private String redditPostfix;
 
     private volatile boolean canRestart = true;
 
@@ -69,14 +64,9 @@ public class MemeParseServiceImpl implements MemeParseService {
             canRestart = false;
         }
 
-        String remoteStorageMd5Sums = "";
-        try {
-            remoteStorageMd5Sums = fileService.getAllBucketObjectsAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        String updateMd5SumResult = fileService.updateMd5SumList();
 
-        if (!remoteStorageMd5Sums.equals(ERROR)) {
+        if (updateMd5SumResult.equals(OK)) {
             try {
                 CompletableFuture<List<Meme>> redditResult = parseProcessor.processRedditGroups();
                 // TODO сделать так, чтобы поток не ждал этот результат, если будет необходимо

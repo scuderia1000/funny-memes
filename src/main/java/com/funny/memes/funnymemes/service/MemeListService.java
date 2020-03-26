@@ -13,4 +13,6 @@ public interface MemeListService {
     List<MemeList> findAllByLang(String lang);
 
     Page<MemeList> findAllByLang(String lang, Pageable pageable);
+
+    List<String> getAllMd5Sum();
 }
