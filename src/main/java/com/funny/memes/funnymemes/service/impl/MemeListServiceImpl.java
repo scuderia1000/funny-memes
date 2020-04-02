@@ -60,6 +60,14 @@ public class MemeListServiceImpl implements MemeListService {
     public List<String> getAllMd5Sum() {
         List<MemeList> memeLists = repository.findByIdNotNull();
 
-        return memeLists.stream().map(MemeList::getMd5Sum).collect(Collectors.toList());
+        return memeLists.stream()
+                .map(MemeList::getMd5Sum)
+                .map(md5Sum -> {
+                    if (md5Sum.contains("\"")) {
+                        md5Sum = md5Sum.replaceAll("\"", "");
+                    }
+                    return md5Sum;
+                })
+                .collect(Collectors.toList());
     }
 }
