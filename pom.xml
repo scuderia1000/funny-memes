@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.funny.memes</groupId>
-    <artifactId>funny-memes</artifactId>
+    <artifactId>funmem</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>funny-memes</name>

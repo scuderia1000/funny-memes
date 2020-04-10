@@ -28,7 +28,7 @@ const loadMore = async function() {
     if (response.ok) {
         let json = await response.json();
         let respPageNum = json.number + 1;
-        window.history.pushState({}, null, pagePrefix + respPageNum);
+        window.history.pushState({page: respPageNum}, null, pagePrefix + respPageNum);
 
         return json;
     } else {
@@ -55,16 +55,18 @@ const appendItems = function(items) {
 };
 
 document.addEventListener('scroll', function() {
-    if (document.documentElement.scrollTop + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-        const loadMorePromise = loadMore();
-        loadMorePromise
-            .then(result => {
-                if (result) {
-                    appendItems(result.content);
-                }
-            })
-            .catch(err => {
-                console.log(err);
-            });
+    if (!window.location.pathname.includes('post')) {
+        if (document.documentElement.scrollTop + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            const loadMorePromise = loadMore();
+            loadMorePromise
+                .then(result => {
+                    if (result) {
+                        appendItems(result.content);
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
     }
 });
