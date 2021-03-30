@@ -1,8 +1,6 @@
 # funny-memes
 An Spring Boot application for downloading data from Reddit groups, parsing content (only jpeg images), uploading image files to AWS S3 and save data to MongoDB Atlas Cloud.
 
-Demo app: https://funmem.herokuapp.com/
-
 For configuration, add env variables:
 
 ```json
